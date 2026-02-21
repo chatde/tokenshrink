@@ -36,6 +36,7 @@
   },
   "devDependencies": {
     "drizzle-kit": "^0.31.9",
+    "gpt-tokenizer": "^3.4.0",
     "vitest": "^4.0.18"
   }
 }

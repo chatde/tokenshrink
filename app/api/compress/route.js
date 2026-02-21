@@ -73,6 +73,8 @@ export async function POST(request) {
         ratio: result.stats.ratio,
         strategy: result.stats.strategy,
         tokensSaved: result.stats.tokensSaved,
+        originalTokens: result.stats.originalTokens,
+        compressedTokens: result.stats.totalCompressedTokens,
       });
 
       // Upsert usage meter

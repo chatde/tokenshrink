@@ -1,9 +1,9 @@
 import { describe, it, expect } from 'vitest';
-import { generateRosetta, countRosettaWords } from '../app/lib/compression/rosetta.js';
+import { generateRosetta, countRosettaWords, countRosettaTokens } from '../app/lib/compression/rosetta.js';
 
 describe('generateRosetta()', () => {
   it('generates a decoder header for multi-word replacements', () => {
-    // Multi-word → shorter replacements that save enough words to pass net-positive filter
+    // Multi-word → shorter replacements that save enough tokens to pass net-positive filter
     const replacements = [
       { original: 'in order to', replacement: 'to', occurrences: 3 },
       { original: 'due to the fact that', replacement: 'because', occurrences: 3 },
@@ -14,11 +14,10 @@ describe('generateRosetta()', () => {
   });
 
   it('skips universal abbreviations', () => {
-    // fn, db, u are universal — should NOT appear in Rosetta
+    // spec, async are universal — should NOT appear in Rosetta
     const replacements = [
-      { original: 'function', replacement: 'fn', occurrences: 5 },
-      { original: 'database', replacement: 'db', occurrences: 5 },
-      { original: 'you', replacement: 'u', occurrences: 5 },
+      { original: 'specification', replacement: 'spec', occurrences: 5 },
+      { original: 'asynchronous', replacement: 'async', occurrences: 5 },
     ];
     const rosetta = generateRosetta(replacements);
     // All are universal, so Rosetta should be empty
@@ -40,5 +39,24 @@ describe('countRosettaWords()', () => {
 
   it('returns 0 for empty string', () => {
     expect(countRosettaWords('')).toBe(0);
+  });
+});
+
+describe('countRosettaTokens()', () => {
+  it('counts tokens in a Rosetta header', () => {
+    const header = '[DECODE]\nfull=comprehensive\n[/DECODE]';
+    const count = countRosettaTokens(header);
+    expect(count).toBeGreaterThan(0);
+  });
+
+  it('returns 0 for empty string', () => {
+    expect(countRosettaTokens('')).toBe(0);
+  });
+
+  it('accepts a custom tokenizer', () => {
+    const header = '[DECODE]\nfull=comprehensive\n[/DECODE]';
+    const mockTokenizer = (text) => text.length;
+    const count = countRosettaTokens(header, mockTokenizer);
+    expect(count).toBe(header.length);
   });
 });

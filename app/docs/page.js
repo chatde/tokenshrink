@@ -42,7 +42,7 @@ export default function DocsPage() {
               </div>
 
               <div className="bg-bg-card border border-border rounded-xl p-5">
-                <h3 className="text-sm font-medium text-savings mb-3">3. Or use the SDK</h3>
+                <h3 className="text-sm font-medium text-savings mb-3">3. Or use the SDK (v2.0)</h3>
                 <pre className="text-xs font-mono text-text-secondary bg-bg p-4 rounded-lg overflow-x-auto">
 {`npm install tokenshrink`}
                 </pre>
@@ -52,7 +52,15 @@ export default function DocsPage() {
 // Compress a prompt — runs locally, no API call needed
 const result = compress('Your long prompt...');
 console.log(result.compressed);
-console.log(result.stats.tokensSaved);
+console.log(result.stats.tokensSaved);       // Real token savings
+console.log(result.stats.originalTokens);     // Original token count
+console.log(result.stats.totalCompressedTokens); // Compressed token count
+
+// Optional: plug in a real tokenizer for exact counts
+import { encode } from 'gpt-tokenizer';
+const result2 = compress('Your long prompt...', {
+  tokenizer: (text) => encode(text).length
+});
 
 // Use with any LLM provider
 import OpenAI from 'openai';
@@ -107,11 +115,16 @@ const res = await openai.chat.completions.create({
     "compressedWords": 42,
     "rosettaWords": 18,
     "totalCompressedWords": 60,
+    "originalTokens": 168,
+    "compressedTokens": 45,
+    "rosettaTokens": 22,
+    "totalCompressedTokens": 67,
     "ratio": 2.5,
-    "tokensSaved": 117,
-    "dollarsSaved": 0.06,
+    "tokensSaved": 101,
+    "dollarsSaved": 0.05,
     "strategy": "domain",
-    "domain": "code"
+    "domain": "code",
+    "tokenizerUsed": "built-in"
   }
 }`}
                     </pre>
@@ -157,6 +170,26 @@ const res = await openai.chat.completions.create({
                   <span className="text-savings font-medium">Free forever</span>
                 </div>
               </div>
+            </div>
+          </section>
+
+          {/* Tokenizer */}
+          <section className="mb-12">
+            <h2 className="text-xl font-semibold text-text mb-4">Token counting</h2>
+            <div className="bg-bg-card border border-border rounded-xl p-5">
+              <p className="text-sm text-text-secondary mb-4">
+                v2.0 uses real token counts instead of word estimates. By default, TokenShrink uses a
+                precomputed lookup table based on <code className="text-text bg-bg px-1.5 py-0.5 rounded text-xs">cl100k_base</code> (GPT-4).
+                For exact counts with your specific model, pass a custom tokenizer:
+              </p>
+              <pre className="text-xs font-mono text-text-secondary bg-bg p-4 rounded-lg overflow-x-auto">
+{`import { compress } from 'tokenshrink';
+import { encode } from 'gpt-tokenizer';
+
+const result = compress(text, {
+  tokenizer: (text) => encode(text).length
+});`}
+              </pre>
             </div>
           </section>
 

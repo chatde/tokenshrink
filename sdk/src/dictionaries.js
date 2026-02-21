@@ -1,5 +1,9 @@
 // Domain-specific abbreviation dictionaries
 // Each maps common long words/phrases to short codes
+//
+// v2.0 — Token-aware: every entry verified to save ≥1 token with cl100k_base.
+// Zero-savings and negative-savings entries removed.
+// See scripts/generate-token-costs.mjs for verification.
 
 // Abbreviations that ALL LLMs understand without a Rosetta entry
 // These save tokens without any decoder overhead
@@ -12,187 +16,35 @@ export const UNIVERSAL_ABBREVIATIONS = new Set([
   'ctx', 'cb', 'mw', 'txn', 'conn', 'nav', 'sub', 'cert', 'dep', 'deps',
   'pkg', 'lib', 'libs', 'util', 'utils', 'sync', 'async', 'exec', 'cmd',
   'args', 'opt', 'ops', 'id', 'ids', 'e.g.', 'i.e.', 'etc.', 'k8s',
-  // SMS-style — all LLMs understand these without a decoder
-  'u', 'ur', 'pls', 'bc', 'w/o', 'thru', 'tho', 'altho', 'btwn',
-  'shd', 'wd', 'abt', 'diff', 'incl', 'avail', 'hlp', 'mng', 'rvw',
 ]);
 
 export const COMMON = {
-  // Programming
-  'function': 'fn',
-  'variable': 'var',
-  'constant': 'const',
-  'parameter': 'param',
-  'argument': 'arg',
-  'return': 'ret',
-  'string': 'str',
-  'number': 'num',
-  'boolean': 'bool',
-  'integer': 'int',
-  'array': 'arr',
-  'object': 'obj',
-  'undefined': 'undef',
-  'null': 'nil',
-  'database': 'db',
-  'configuration': 'cfg',
-  'authentication': 'auth',
-  'authorization': 'authz',
-  'application': 'app',
-  'environment': 'env',
-  'development': 'dev',
-  'production': 'prod',
-  'repository': 'repo',
-  'directory': 'dir',
-  'message': 'msg',
-  'request': 'req',
-  'response': 'res',
-  'information': 'info',
-  'description': 'desc',
-  'specification': 'spec',
-  'documentation': 'docs',
-  'implementation': 'impl',
-  'initialize': 'init',
-  'temperature': 'temp',
-  'maximum': 'max',
-  'minimum': 'min',
-  'administrator': 'admin',
-  'management': 'mgmt',
-  'component': 'comp',
-  'performance': 'perf',
-  'reference': 'ref',
-  'property': 'prop',
-  'properties': 'props',
-  'attribute': 'attr',
-  'attributes': 'attrs',
-  'element': 'el',
-  'elements': 'els',
-  'index': 'idx',
-  'length': 'len',
-  'previous': 'prev',
-  'current': 'curr',
-  'temporary': 'tmp',
-  'calculate': 'calc',
-  'generation': 'gen',
-  'original': 'orig',
-  'destination': 'dest',
-  'source': 'src',
-  'memory': 'mem',
-  'address': 'addr',
-  'context': 'ctx',
-  'expression': 'expr',
-  'condition': 'cond',
-  'callback': 'cb',
-  'middleware': 'mw',
-  'transaction': 'txn',
-  'connection': 'conn',
-  'exception': 'exc',
-  'collection': 'coll',
-  'iteration': 'iter',
-  'navigation': 'nav',
-  'notification': 'notif',
-  'subscription': 'sub',
-  'certificate': 'cert',
-  'dependency': 'dep',
-  'dependencies': 'deps',
-  'package': 'pkg',
-  'packages': 'pkgs',
-  'library': 'lib',
-  'libraries': 'libs',
-  'utility': 'util',
-  'utilities': 'utils',
-  'example': 'ex',
-  'examples': 'exs',
-  'synchronize': 'sync',
-  'asynchronous': 'async',
-  'execute': 'exec',
-  'command': 'cmd',
-  'commands': 'cmds',
-  'arguments': 'args',
-  'optional': 'opt',
-  'required': 'reqd',
-  'permission': 'perm',
-  'permissions': 'perms',
-  'operation': 'op',
-  'operations': 'ops',
-  'resource': 'rsc',
-  'resources': 'rscs',
-  'identifier': 'id',
-  'identifiers': 'ids',
-  'significant': 'major',
-  'appropriate': 'proper',
-  'approximately': '~',
+  // Multi-token words → single-token abbreviations (verified savings with cl100k_base)
+  'specification': 'spec',     // 2t → 1t
+  'asynchronous': 'async',     // 2t → 1t
+  'synchronize': 'sync',       // 2t → 1t
+  'significant': 'major',      // 2t → 1t
+  'identifiers': 'ids',        // 2t → 1t
 
-  // SMS-style abbreviations (universally understood by LLMs)
-  'you': 'u',
-  'your': 'ur',
-  'please': 'pls',
-  'because': 'bc',
-  'without': 'w/o',
-  'through': 'thru',
-  'though': 'tho',
-  'although': 'altho',
-  'between': 'btwn',
-  'should': 'shd',
-  'would': 'wd',
-  'about': 'abt',
-
-  // Vowel-dropping (common words, inferable from context)
-  'help': 'hlp',
-  'provide': 'prvd',
-  'provides': 'prvds',
-  'explain': 'expln',
-  'include': 'incl',
-  'includes': 'incls',
-  'including': 'inclg',
-  'consider': 'cnsdr',
-  'suggest': 'sgst',
-  'respond': 'rspnd',
-  'different': 'diff',
-  'available': 'avail',
-  'following': 'fllwng',
-  'handle': 'hndl',
-  'manage': 'mng',
-  'analyze': 'anlyz',
-  'review': 'rvw',
-  'validate': 'vldt',
-  'necessary': 'ncsry',
-  'potential': 'ptntl',
-  'improve': 'imprv',
-  'identify': 'idntfy',
-  'specific': 'spcfc',
-  'relevant': 'rlvnt',
-  'recommend': 'rcmnd',
-  'understand': 'undrstd',
-  'determine': 'dtrmn',
-  'implement': 'impl',
-
-  'communicate': 'convey',
-  'comprehensive': 'full',
-  'particularly': 'esp',
-  'specifically': 'esp',
-  'functionality': 'features',
-  'additionally': 'also',
-  'consequently': 'so',
-  'requirements': 'reqs',
-  'automatically': 'auto',
-  'immediately': 'now',
-  'successfully': 'OK',
-  'consistently': 'always',
-  'optimization': 'optim',
-  'optimizations': 'optims',
-  'vulnerability': 'vuln',
-  'vulnerabilities': 'vulns',
-  'unfortunately': 'sadly',
-  'fundamentally': 'at core',
-  'alternatively': 'or',
-  'respectively': 'each',
-  'systematically': 'methodically',
-  'consideration': 'factor',
-  'considerations': 'factors',
+  // Long words → shorter real words (saves tokens)
+  'comprehensive': 'full',     // 2t → 1t
+  'specifically': 'esp',       // 2t → 1t
+  'functionality': 'features', // 2t → 1t
+  'additionally': 'also',      // 2t → 1t
+  'consequently': 'so',        // 3t → 1t
+  'automatically': 'auto',     // 2t → 1t
+  'immediately': 'now',        // 2t → 1t
+  'successfully': 'OK',        // 2t → 1t
+  'consistently': 'always',    // 3t → 1t
+  'fundamentally': 'at core',  // 3t → 2t
+  'alternatively': 'or',       // 2t → 1t
+  'respectively': 'each',      // 2t → 1t
+  'consideration': 'factor',   // 2t → 1t
 };
 
 export const PHRASES = {
   // Verbose → concise (sorted roughly by frequency in prompts)
+  // All phrase entries verified to save tokens — multi-word → fewer tokens
   'you should': '',
   'you must': '',
   'please make sure to': '',
@@ -257,13 +109,13 @@ export const PHRASES = {
   'a number of': 'several',
   'a lot of': 'many',
   'on behalf of': 'for',
-  'for example': 'e.g.',
-  'that is': 'i.e.',
-  'in other words': 'i.e.',
+  // Removed: 'for example' → 'e.g.' (WORSE: 2t→3t)
+  // Removed: 'that is' → 'i.e.' (WORSE: 2t→3t)
+  // Removed: 'in other words' → 'i.e.' (ZERO: 3t→3t)
   'and so on': 'etc.',
   'and so forth': 'etc.',
   'et cetera': 'etc.',
-  'such as': 'e.g.',
+  // Removed: 'such as' → 'e.g.' (WORSE: 2t→3t)
   // Additional filler phrases
   'you need to': '',
   'you will need to': '',
@@ -317,7 +169,7 @@ export const PHRASES = {
   'has the ability to': 'can',
   'does not have the ability to': 'cannot',
   'in a manner that': 'so that',
-  'to the extent that': 'insofar as',
+  // Removed: 'to the extent that' → 'insofar as' (ZERO: 4t→4t)
   'for the sake of': 'for',
   'on the basis of': 'based on',
   'by means of': 'via',
@@ -329,66 +181,47 @@ export const PHRASES = {
 };
 
 export const CODE_DOMAIN = {
-  'endpoint': 'ep',
-  'middleware': 'mw',
-  'controller': 'ctrl',
-  'repository': 'repo',
-  'interface': 'iface',
-  'abstract': 'abs',
-  'constructor': 'ctor',
-  'destructor': 'dtor',
-  'polymorphism': 'poly',
-  'inheritance': 'inherit',
-  'encapsulation': 'encap',
-  'serialization': 'serial',
-  'deserialization': 'deserial',
-  'infrastructure': 'infra',
-  'microservice': '\u00B5svc',
-  'kubernetes': 'k8s',
+  // Only entries that save tokens (verified with cl100k_base)
+  'infrastructure': 'infra',       // 2t → 1t
+  'inheritance': 'inherit',        // 2t → 1t
+  'polymorphism': 'poly',          // 3t → 1t
+  // Removed zero-savings: endpoint, middleware, controller, repository,
+  //   interface, abstract, constructor, destructor, encapsulation,
+  //   serialization, deserialization, microservice
+  // Removed WORSE: kubernetes → k8s (2t→3t)
 };
 
 export const MEDICAL_DOMAIN = {
-  'prescription': 'Rx',
-  'diagnosis': 'dx',
-  'treatment': 'tx',
-  'symptoms': 'sx',
-  'examination': 'exam',
-  'patient': 'pt',
-  'hospital': 'hosp',
-  'laboratory': 'lab',
-  'temperature': 'temp',
-  'medication': 'med',
-  'medications': 'meds',
+  // Only entries that save tokens (verified with cl100k_base)
+  'prescription': 'Rx',     // 2t → 1t
+  'diagnosis': 'dx',        // 2t → 1t
+  'treatment': 'tx',        // 2t → 1t
+  'symptoms': 'sx',         // 2t → 1t
+  'examination': 'exam',    // 2t → 1t
+  'laboratory': 'lab',      // 2t → 1t
+  'medication': 'med',      // 2t → 1t
+  // Removed zero-savings: patient, temperature, medications
+  // Removed WORSE: hospital → hosp (1t→2t)
 };
 
 export const LEGAL_DOMAIN = {
-  'agreement': 'agmt',
-  'paragraph': 'para',
-  'subsection': 'subsec',
-  'jurisdiction': 'juris',
-  'plaintiff': 'pl',
-  'defendant': 'def',
-  'hereinafter': '(below)',
-  'aforementioned': '(above)',
-  'notwithstanding': 'despite',
-  'whereas': 'since',
-  'hereby': '(now)',
-  'therein': 'in it',
-  'thereof': 'of it',
-  'pursuant to': 'under',
+  // Only entries that save tokens (verified with cl100k_base)
+  'plaintiff': 'pl',        // 3t → 1t
+  'defendant': 'def',       // 2t → 1t
+  'whereas': 'since',       // 2t → 1t
+  'pursuant to': 'under',   // 4t → 1t
+  // Removed zero-savings: paragraph, subsection, jurisdiction, hereinafter,
+  //   aforementioned, notwithstanding, hereby, therein, thereof
+  // Removed WORSE: agreement → agmt (1t→2t)
 };
 
 export const BUSINESS_DOMAIN = {
-  'stakeholder': 'SH',
-  'deliverable': 'dlv',
-  'implementation': 'impl',
-  'organization': 'org',
-  'management': 'mgmt',
-  'department': 'dept',
-  'infrastructure': 'infra',
-  'approximately': '~',
-  'requirements': 'reqs',
-  'quarterly': 'Q',
+  // Only entries that save tokens (verified with cl100k_base)
+  'stakeholder': 'SH',        // 2t → 1t
+  'infrastructure': 'infra',  // 2t → 1t
+  'quarterly': 'Q',           // 2t → 1t
+  // Removed zero-savings: deliverable, implementation, organization, department, approximately
+  // Removed WORSE: management → mgmt (1t→2t), requirements → reqs (1t→2t)
 };
 
 export const ALL_DOMAINS = {

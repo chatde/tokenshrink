@@ -1,16 +1,17 @@
 import { getDictionary, UNIVERSAL_ABBREVIATIONS } from './dictionaries.js';
 import { detectStrategy, findRepeatedPhrases } from './strategies.js';
-import { generateRosetta, countRosettaWords } from './rosetta.js';
-import { countWords, wordsToTokens, tokensToDollars } from './utils.js';
+import { generateRosetta, countRosettaWords, countRosettaTokens } from './rosetta.js';
+import { countWords, wordsToTokens, tokensToDollars, countTokens, replacementTokenSavings } from './utils.js';
+import { ZERO_SAVINGS, NEGATIVE_SAVINGS } from './token-costs.js';
 
 const MIN_WORDS_FOR_COMPRESSION = 30;
 const MIN_SAVINGS_RATIO = 0.05; // Only compress if saving >5%
 
 export function compress(text, options = {}) {
-  const { domain = 'auto', forceStrategy } = options;
+  const { domain = 'auto', forceStrategy, tokenizer } = options;
   const originalText = text.trim();
   const originalWords = countWords(originalText);
-  const originalTokens = wordsToTokens(originalWords);
+  const originalTokens = countTokens(originalText, tokenizer);
 
   // Too short — compression overhead exceeds savings
   if (originalWords < MIN_WORDS_FOR_COMPRESSION) {
@@ -23,10 +24,15 @@ export function compress(text, options = {}) {
         compressedWords: originalWords,
         rosettaWords: 0,
         totalCompressedWords: originalWords,
+        originalTokens,
+        compressedTokens: originalTokens,
+        rosettaTokens: 0,
+        totalCompressedTokens: originalTokens,
         ratio: 1,
         tokensSaved: 0,
         dollarsSaved: 0,
         strategy: 'none',
+        tokenizerUsed: typeof tokenizer === 'function' ? 'custom' : 'built-in',
         tooShort: true,
       },
     };
@@ -48,6 +54,13 @@ export function compress(text, options = {}) {
     .sort((a, b) => b[0].length - a[0].length);
 
   for (const [phrase, abbr] of phraseEntries) {
+    // Skip entries that save zero or negative tokens
+    if (ZERO_SAVINGS.has(phrase) || NEGATIVE_SAVINGS.has(phrase)) continue;
+
+    // Verify this replacement actually saves tokens
+    const savings = replacementTokenSavings(phrase, abbr, tokenizer);
+    if (savings <= 0) continue;
+
     const regex = new RegExp(`\\b${escapeRegex(phrase)}\\b`, 'gi');
     const matches = compressed.match(regex);
     if (matches && matches.length > 0) {
@@ -64,6 +77,14 @@ export function compress(text, options = {}) {
 
   for (const [word, abbr] of wordEntries) {
     if (word === abbr) continue; // skip identity mappings
+
+    // Skip entries that save zero or negative tokens
+    if (ZERO_SAVINGS.has(word) || NEGATIVE_SAVINGS.has(word)) continue;
+
+    // Verify this replacement actually saves tokens
+    const savings = replacementTokenSavings(word, abbr, tokenizer);
+    if (savings <= 0) continue;
+
     const regex = new RegExp(`\\b${escapeRegex(word)}\\b`, 'gi');
     const matches = compressed.match(regex);
     if (matches && matches.length > 0) {
@@ -108,18 +129,24 @@ export function compress(text, options = {}) {
     .trim();
 
   // Generate Rosetta Stone (smart — only includes net-positive, non-universal entries)
-  const rosetta = generateRosetta(usedReplacements, patternReplacements);
+  const rosetta = generateRosetta(usedReplacements, patternReplacements, tokenizer);
   const rosettaWords = countRosettaWords(rosetta);
+  const rosettaTokens = countRosettaTokens(rosetta, tokenizer);
   const compressedWords = countWords(compressed);
+  const compressedTokens = countTokens(compressed, tokenizer);
   const totalCompressedWords = compressedWords + rosettaWords;
+  const totalCompressedTokens = compressedTokens + rosettaTokens;
 
-  // Calculate savings
-  const ratio = originalWords / totalCompressedWords;
-  const tokensSaved = wordsToTokens(originalWords - totalCompressedWords);
-  const dollarsSaved = tokensToDollars(Math.max(0, tokensSaved));
+  // Calculate savings (token-based)
+  const tokenRatio = totalCompressedTokens > 0 ? originalTokens / totalCompressedTokens : 1;
+  const tokensSaved = Math.max(0, originalTokens - totalCompressedTokens);
+  const dollarsSaved = tokensToDollars(tokensSaved);
+
+  // Word-based ratio for backward compat threshold check
+  const wordRatio = totalCompressedWords > 0 ? originalWords / totalCompressedWords : 1;
 
   // If savings are below threshold, return original
-  if (ratio < (1 + MIN_SAVINGS_RATIO)) {
+  if (tokenRatio < (1 + MIN_SAVINGS_RATIO) && wordRatio < (1 + MIN_SAVINGS_RATIO)) {
     return {
       compressed: originalText,
       rosetta: '',
@@ -129,10 +156,15 @@ export function compress(text, options = {}) {
         compressedWords: originalWords,
         rosettaWords: 0,
         totalCompressedWords: originalWords,
+        originalTokens,
+        compressedTokens: originalTokens,
+        rosettaTokens: 0,
+        totalCompressedTokens: originalTokens,
         ratio: 1,
         tokensSaved: 0,
         dollarsSaved: 0,
         strategy: 'none',
+        tokenizerUsed: typeof tokenizer === 'function' ? 'custom' : 'built-in',
         belowThreshold: true,
       },
     };
@@ -151,14 +183,19 @@ export function compress(text, options = {}) {
       compressedWords,
       rosettaWords,
       totalCompressedWords,
-      ratio: Math.round(ratio * 10) / 10,
-      tokensSaved: Math.max(0, tokensSaved),
+      originalTokens,
+      compressedTokens,
+      rosettaTokens,
+      totalCompressedTokens,
+      ratio: Math.round(tokenRatio * 10) / 10,
+      tokensSaved,
       dollarsSaved: Math.round(dollarsSaved * 100) / 100,
       strategy: detected.strategy,
       domain: detected.domain,
       confidence: detected.confidence,
       replacementCount: usedReplacements.length,
       patternCount: patternReplacements.length,
+      tokenizerUsed: typeof tokenizer === 'function' ? 'custom' : 'built-in',
     },
   };
 }

@@ -174,7 +174,7 @@ export default function CompressorWidget() {
                   {result.stats.tokensSaved.toLocaleString()} tokens saved
                 </div>
                 <div className="text-sm text-text-muted mt-1">
-                  {result.stats.ratio}x compression &middot; {result.stats.originalWords} &rarr; {result.stats.totalCompressedWords} words
+                  {result.stats.ratio}x compression &middot; {result.stats.originalTokens.toLocaleString()} &rarr; {result.stats.totalCompressedTokens.toLocaleString()} tokens
                   {result.stats.dollarsSaved > 0.005 && ` · $${result.stats.dollarsSaved.toFixed(2)} saved`}
                 </div>
               </div>
@@ -186,7 +186,7 @@ export default function CompressorWidget() {
                   <div className="flex items-center justify-between px-4 py-2.5 border-b border-border bg-cost-dim/20">
                     <span className="text-xs font-medium text-cost">Original</span>
                     <span className="text-xs text-cost/70">
-                      {result.stats.originalWords.toLocaleString()} words
+                      {result.stats.originalTokens.toLocaleString()} tokens
                     </span>
                   </div>
                   <div className="p-4 max-h-64 overflow-y-auto">
@@ -199,7 +199,7 @@ export default function CompressorWidget() {
                   <div className="flex items-center justify-between px-4 py-2.5 border-b border-border bg-savings-dim/20">
                     <span className="text-xs font-medium text-savings">Compressed</span>
                     <span className="text-xs text-savings/70">
-                      {result.stats.totalCompressedWords.toLocaleString()} words
+                      {result.stats.totalCompressedTokens.toLocaleString()} tokens
                     </span>
                   </div>
                   <div className="p-4 max-h-64 overflow-y-auto">
@@ -224,7 +224,7 @@ export default function CompressorWidget() {
                   { label: 'Strategy', value: result.stats.strategy },
                   { label: 'Replacements', value: result.stats.replacementCount },
                   { label: 'Patterns', value: result.stats.patternCount },
-                  { label: 'Rosetta', value: `${result.stats.rosettaWords} words` },
+                  { label: 'Tokenizer', value: result.stats.tokenizerUsed },
                 ].map(({ label, value }) => (
                   <div key={label} className="text-center p-3 bg-bg-card rounded-lg border border-border">
                     <div className="text-xs text-text-muted mb-1">{label}</div>

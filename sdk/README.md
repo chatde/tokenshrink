@@ -4,9 +4,19 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 [![Zero Dependencies](https://img.shields.io/badge/dependencies-0-brightgreen)](package.json)
 
-**Compress AI prompts — same results, fewer tokens.** Works with every LLM.
+**Token-aware AI prompt compression — same results, fewer tokens.** Works with every LLM.
 
-Zero dependencies. Pure JavaScript. ~10% token savings on average.
+Zero runtime dependencies. Pure JavaScript. Real token savings verified with cl100k_base.
+
+## What's new in v2.0
+
+v2.0 is **token-aware** — every replacement is verified to save actual BPE tokens, not just characters.
+
+- Removed 130+ entries that saved zero tokens (e.g. "function"→"fn" = 1 token → 1 token)
+- Removed 45 entries that actually *increased* tokens (e.g. "should"→"shd" = 1 token → 2 tokens)
+- New `countTokens()` function with built-in cl100k_base lookup
+- Pluggable tokenizer support: `compress(text, { tokenizer })`
+- New stats: `originalTokens`, `compressedTokens`, `rosettaTokens`, `totalCompressedTokens`
 
 ## Install
 
@@ -21,9 +31,23 @@ import { compress } from 'tokenshrink';
 
 const result = compress('In order to build a good application, it is important to consider the requirements and make sure that you understand the specifications before you start the implementation process.');
 
-console.log(result.compressed);   // Compressed text with [DECODE] header
-console.log(result.stats.tokensSaved);  // Tokens saved
-console.log(result.stats.ratio);        // Compression ratio
+console.log(result.compressed);              // Compressed text
+console.log(result.stats.tokensSaved);       // Real token savings
+console.log(result.stats.originalTokens);    // Original token count
+console.log(result.stats.totalCompressedTokens); // Compressed token count
+```
+
+### With a custom tokenizer (optional, for exact counts)
+
+```javascript
+import { compress } from 'tokenshrink';
+import { encode } from 'gpt-tokenizer';
+
+const result = compress(longPrompt, {
+  tokenizer: (text) => encode(text).length
+});
+
+console.log(result.stats.tokenizerUsed); // "custom"
 ```
 
 ## API
@@ -37,6 +61,7 @@ Compresses text for LLM consumption.
 - `options` (object, optional):
   - `domain` (`'auto'` | `'code'` | `'medical'` | `'legal'` | `'business'`) — Compression domain. Default: `'auto'`
   - `forceStrategy` (string) — Override auto-detected strategy
+  - `tokenizer` (function) — Custom tokenizer: `(text: string) => number`. Default: built-in cl100k_base lookup
 
 **Returns:**
 ```javascript
@@ -50,51 +75,83 @@ Compresses text for LLM consumption.
     compressedWords: number,
     rosettaWords: number,
     totalCompressedWords: number,
-    ratio: number,           // e.g. 1.2 = 20% smaller
-    tokensSaved: number,
+    originalTokens: number,         // NEW in v2.0
+    compressedTokens: number,       // NEW in v2.0
+    rosettaTokens: number,          // NEW in v2.0
+    totalCompressedTokens: number,  // NEW in v2.0
+    ratio: number,           // Token-based compression ratio
+    tokensSaved: number,     // Real token savings
     dollarsSaved: number,    // Estimated at $0.005/1K tokens
     strategy: string,
     domain: string,
     confidence: number,
     replacementCount: number,
     patternCount: number,
+    tokenizerUsed: string,   // "built-in" or "custom"
   }
 }
 ```
 
-### `detectStrategy(text)`
+### `countTokens(text, tokenizer?)`
 
-Auto-detects the best compression domain for a given text.
+Count tokens using the built-in lookup or a custom tokenizer.
 
 ```javascript
-import { detectStrategy } from 'tokenshrink';
+import { countTokens } from 'tokenshrink';
+
+countTokens('Hello world');           // Built-in estimate
+countTokens('Hello world', encode);   // Exact count with gpt-tokenizer
+```
+
+### `replacementTokenSavings(original, replacement, tokenizer?)`
+
+Check if a replacement saves tokens.
+
+```javascript
+import { replacementTokenSavings } from 'tokenshrink';
+
+replacementTokenSavings('consequently', 'so');   // 2 (saves 2 tokens)
+replacementTokenSavings('function', 'fn');        // 0 (no savings)
+replacementTokenSavings('should', 'shd');         // -1 (costs more!)
+```
+
+### `detectStrategy(text)` / `getDictionary(domain)`
+
+```javascript
+import { detectStrategy, getDictionary } from 'tokenshrink';
 
 detectStrategy('The patient presented with acute symptoms...');
 // { strategy: 'domain', domain: 'medical', confidence: 0.7 }
-```
-
-### `getDictionary(domain)`
-
-Returns the abbreviation dictionary for a domain.
-
-```javascript
-import { getDictionary } from 'tokenshrink';
 
 const dict = getDictionary('code');
-// { 'function': 'fn', 'variable': 'var', ... }
+// { 'infrastructure': 'infra', 'polymorphism': 'poly', ... }
 ```
 
-### `countWords(text)` / `wordsToTokens(words)` / `tokensToDollars(tokens)`
+### `TOKEN_COSTS` / `ZERO_SAVINGS` / `NEGATIVE_SAVINGS`
 
-Utility functions for token math.
+Access the precomputed token data directly.
 
 ```javascript
-import { countWords, wordsToTokens, tokensToDollars } from 'tokenshrink';
+import { TOKEN_COSTS, ZERO_SAVINGS, NEGATIVE_SAVINGS } from 'tokenshrink';
 
-const words = countWords('Hello world');         // 2
-const tokens = wordsToTokens(words);             // 3 (1 word ≈ 1.3 tokens)
-const cost = tokensToDollars(tokens);            // 0.000015
+TOKEN_COSTS['function'];     // 1 (single token in cl100k_base)
+TOKEN_COSTS['consequently']; // 3 (multiple tokens)
+ZERO_SAVINGS.has('database');  // true — don't bother abbreviating
+NEGATIVE_SAVINGS.has('should'); // true — "shd" costs MORE
 ```
+
+## Benchmarks (verified with gpt-tokenizer)
+
+| Prompt | Original | Compressed | Saved | % |
+|--------|----------|------------|-------|---|
+| Dev assistant (verbose) | 408 | 349 | 59 | 14.5% |
+| Code review prompt | 210 | 183 | 27 | 12.9% |
+| Medical notes | 151 | 134 | 17 | 11.3% |
+| Business requirements | 143 | 121 | 22 | 15.4% |
+| Minimal filler (hard to compress) | 77 | 77 | 0 | 0.0% |
+| **Total** | **989** | **864** | **125** | **12.6%** |
+
+All counts verified with `gpt-tokenizer` (cl100k_base). No prompt had its token count increase.
 
 ## Usage with LLM Providers
 
@@ -144,24 +201,16 @@ const response = await fetch('http://localhost:11434/api/generate', {
 });
 ```
 
-## Compression Domains
+## v2.0 Migration
 
-| Domain | Best for | Example signals |
-|--------|----------|-----------------|
-| `auto` | General use (default) | Auto-detects from content |
-| `code` | Programming prompts | function, const, import, async |
-| `medical` | Clinical notes | patient, diagnosis, treatment |
-| `legal` | Legal documents | hereby, whereas, plaintiff |
-| `business` | Business comms | stakeholder, deliverable, KPI |
+If upgrading from v1.x:
 
-## How It Works
-
-1. **Phrase removal** — Verbose filler is compressed or removed ("in order to" → "to")
-2. **Word abbreviation** — Common words become short codes ("function" → "fn")
-3. **Pattern detection** — Repeated phrases are collapsed into shorthand (P1, P2...)
-4. **Rosetta Stone** — A tiny decoder header teaches the LLM all abbreviations
-
-No LLM calls. No external APIs. Everything runs locally in ~1ms.
+- `tokensSaved` is now based on real token counts (was `words * 1.3`)
+- `ratio` is now token-based (was word-based)
+- New stats fields: `originalTokens`, `compressedTokens`, `rosettaTokens`, `totalCompressedTokens`, `tokenizerUsed`
+- `wordsToTokens()` still works but is deprecated — use `countTokens()` instead
+- Many dictionary entries removed (they didn't save tokens) — this is intentional
+- `compress()` accepts optional `tokenizer` in options
 
 ## Links
 

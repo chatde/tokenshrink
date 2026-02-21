@@ -1,7 +1,7 @@
 {
   "name": "tokenshrink",
-  "version": "1.0.0",
-  "description": "Compress AI prompts — same results, fewer tokens. Works with every LLM.",
+  "version": "2.0.0",
+  "description": "Token-aware AI prompt compression — same results, fewer tokens. Works with every LLM.",
   "type": "module",
   "main": "./src/index.js",
   "exports": {
@@ -21,7 +21,9 @@
     "openai",
     "anthropic",
     "claude",
-    "gpt"
+    "gpt",
+    "tokenizer",
+    "bpe"
   ],
   "author": "Wattson",
   "license": "MIT",
@@ -32,5 +34,13 @@
   "homepage": "https://tokenshrink.com",
   "engines": {
     "node": ">=16.0.0"
+  },
+  "peerDependencies": {
+    "gpt-tokenizer": ">=2.0.0"
+  },
+  "peerDependenciesMeta": {
+    "gpt-tokenizer": {
+      "optional": true
+    }
   }
 }
