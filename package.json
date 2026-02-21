@@ -6,12 +6,21 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
+    "test": "vitest run",
+    "test:watch": "vitest",
     "lint": "next lint",
     "db:push": "drizzle-kit push",
     "db:studio": "drizzle-kit studio"
   },
-  "keywords": ["ai", "tokens", "compression", "llm", "openai", "anthropic"],
-  "author": "TokenShrink",
+  "keywords": [
+    "ai",
+    "tokens",
+    "compression",
+    "llm",
+    "openai",
+    "anthropic"
+  ],
+  "author": "Wattson",
   "license": "MIT",
   "dependencies": {
     "@neondatabase/serverless": "^1.0.2",
@@ -26,6 +35,7 @@
     "tailwindcss": "^4.2.0"
   },
   "devDependencies": {
-    "drizzle-kit": "^0.31.9"
+    "drizzle-kit": "^0.31.9",
+    "vitest": "^4.0.18"
   }
 }

@@ -1,5 +1,9 @@
 # TokenShrink
 
+[![CI](https://github.com/chatde/tokenshrink/actions/workflows/ci.yml/badge.svg)](https://github.com/chatde/tokenshrink/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+[![Free](https://img.shields.io/badge/Price-Free%20Forever-brightgreen)](https://tokenshrink.com)
+
 **Same AI, fewer tokens. Free forever.**
 
 [tokenshrink.com](https://tokenshrink.com) | [Docs](https://tokenshrink.com/docs) | [API](https://tokenshrink.com/docs)
