@@ -71,23 +71,30 @@ Response:
 }
 ```
 
-### SDK
+### SDK (coming soon)
 
-```bash
-npm install tokenshrink
-```
+The npm SDK is in development. For now, use the REST API directly:
 
 ```javascript
-import { TokenShrink } from 'tokenshrink';
+// Compress a prompt before sending to any LLM
+async function shrink(text) {
+  const res = await fetch('https://tokenshrink.com/api/compress', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ text }),
+  });
+  const { compressed } = await res.json();
+  return compressed;
+}
+
+// Use with OpenAI
 import OpenAI from 'openai';
+const openai = new OpenAI();
 
-const ts = new TokenShrink({ apiKey: 'ts_live_...' });
-const openai = ts.wrapOpenAI(new OpenAI());
-
-// Prompts are automatically compressed
+const prompt = await shrink(longSystemPrompt);
 const res = await openai.chat.completions.create({
   model: 'gpt-4o',
-  messages: [{ role: 'system', content: longSystemPrompt }],
+  messages: [{ role: 'system', content: prompt }],
 });
 ```
 
@@ -123,9 +130,39 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for development details.
 - **Deployment**: Vercel
 - **Compression**: Client-side engine — no LLM calls, no external APIs
 
+## Testing
+
+```bash
+npm test          # run all 29 tests
+npm run test:watch  # watch mode
+```
+
+Tests cover the compression engine, Rosetta Stone generator, domain detection, and billing utilities.
+
+## Security & privacy
+
+- **No prompt storage**: Your text is processed in memory and immediately discarded. We never log or store prompt content.
+- **No LLM calls**: Compression is pure text processing — your data never leaves the server.
+- **No tracking**: No analytics, no cookies, no fingerprinting beyond basic server logs.
+- **Open source**: Review the code yourself. If you find a vulnerability, [open an issue](https://github.com/chatde/tokenshrink/issues).
+
+## Roadmap
+
+- [ ] Publish npm SDK (`npm install tokenshrink`)
+- [ ] Add more compression domains (scientific, academic)
+- [ ] Multilingual prompt support
+- [ ] Browser extension for ChatGPT/Claude web UI
+- [ ] VS Code extension
+- [ ] Self-hosted Docker image
+- [ ] Compression analytics dashboard
+
 ## Pricing
 
 Free. No limits, no credit card, no catch.
+
+## Built by
+
+Made by [Wattson](https://github.com/chatde). Contributions welcome — see [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## License
 
