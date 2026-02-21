@@ -71,32 +71,26 @@ Response:
 }
 ```
 
-### SDK (coming soon)
+### SDK
 
-The npm SDK is in development. For now, use the REST API directly:
+```bash
+npm install tokenshrink
+```
 
 ```javascript
-// Compress a prompt before sending to any LLM
-async function shrink(text) {
-  const res = await fetch('https://tokenshrink.com/api/compress', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ text }),
-  });
-  const { compressed } = await res.json();
-  return compressed;
-}
+import { compress } from 'tokenshrink';
 
-// Use with OpenAI
-import OpenAI from 'openai';
-const openai = new OpenAI();
+const { compressed, stats } = compress(longSystemPrompt);
+console.log(`Saved ${stats.tokensSaved} tokens`);
 
-const prompt = await shrink(longSystemPrompt);
+// Use with any LLM
 const res = await openai.chat.completions.create({
   model: 'gpt-4o',
-  messages: [{ role: 'system', content: prompt }],
+  messages: [{ role: 'system', content: compressed }],
 });
 ```
+
+See the [SDK README](sdk/README.md) for full API docs and examples.
 
 ## Compression domains
 
@@ -148,7 +142,7 @@ Tests cover the compression engine, Rosetta Stone generator, domain detection, a
 
 ## Roadmap
 
-- [ ] Publish npm SDK (`npm install tokenshrink`)
+- [x] Publish npm SDK (`npm install tokenshrink`)
 - [ ] Add more compression domains (scientific, academic)
 - [ ] Multilingual prompt support
 - [ ] Browser extension for ChatGPT/Claude web UI

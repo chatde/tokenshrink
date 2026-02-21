@@ -1,0 +1,36 @@
+{
+  "name": "tokenshrink",
+  "version": "1.0.0",
+  "description": "Compress AI prompts — same results, fewer tokens. Works with every LLM.",
+  "type": "module",
+  "main": "./src/index.js",
+  "exports": {
+    ".": "./src/index.js"
+  },
+  "files": [
+    "src/",
+    "README.md",
+    "LICENSE"
+  ],
+  "keywords": [
+    "ai",
+    "llm",
+    "tokens",
+    "compression",
+    "prompt",
+    "openai",
+    "anthropic",
+    "claude",
+    "gpt"
+  ],
+  "author": "Wattson",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/chatde/tokenshrink.git"
+  },
+  "homepage": "https://tokenshrink.com",
+  "engines": {
+    "node": ">=16.0.0"
+  }
+}
