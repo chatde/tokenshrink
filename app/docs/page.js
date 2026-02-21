@@ -47,19 +47,20 @@ export default function DocsPage() {
 {`npm install tokenshrink`}
                 </pre>
                 <pre className="text-xs font-mono text-text-secondary bg-bg p-4 rounded-lg overflow-x-auto mt-3">
-{`import { TokenShrink } from 'tokenshrink';
+{`import { compress } from 'tokenshrink';
 
-const ts = new TokenShrink({ apiKey: 'ts_live_...' });
-
-// Compress a prompt
-const result = await ts.compress('Your long prompt...');
+// Compress a prompt — runs locally, no API call needed
+const result = compress('Your long prompt...');
 console.log(result.compressed);
 console.log(result.stats.tokensSaved);
 
-// Or wrap your OpenAI client
+// Use with any LLM provider
 import OpenAI from 'openai';
-const openai = ts.wrapOpenAI(new OpenAI());
-// All prompts are now auto-compressed!`}
+const openai = new OpenAI();
+const res = await openai.chat.completions.create({
+  model: 'gpt-4o',
+  messages: [{ role: 'system', content: result.compressed }],
+});`}
                 </pre>
               </div>
             </div>

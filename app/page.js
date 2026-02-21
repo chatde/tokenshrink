@@ -101,18 +101,19 @@ export default function Home() {
                 <span className="ml-2 text-xs text-text-muted">app.js</span>
               </div>
               <pre className="p-5 text-sm font-mono text-text-secondary overflow-x-auto">
-                <code>{`import OpenAI from 'openai';
-import { TokenShrink } from 'tokenshrink';
+                <code>{`import { compress } from 'tokenshrink';
+import OpenAI from 'openai';
 
-const ts = new TokenShrink({ apiKey: 'ts_live_...' });
-const openai = ts.wrapOpenAI(new OpenAI());
+// Compress your system prompt
+const { compressed, stats } = compress(longPrompt);
+console.log(\`Saved \${stats.tokensSaved} tokens\`);
 
-// Prompts are automatically compressed
+// Use with any LLM — OpenAI, Anthropic, local models
+const openai = new OpenAI();
 const res = await openai.chat.completions.create({
   model: 'gpt-4o',
-  messages: [{ role: 'system', content: longPrompt }],
-});
-// Console: [TokenShrink] Saved 42 tokens`}</code>
+  messages: [{ role: 'system', content: compressed }],
+});`}</code>
               </pre>
             </div>
 
