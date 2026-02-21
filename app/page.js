@@ -1,5 +1,6 @@
 import Navbar from './components/Navbar';
 import CompressorWidget from './components/CompressorWidget';
+import Shrinkray from './components/Shrinkray';
 import Link from 'next/link';
 
 export default function Home() {
@@ -11,6 +12,9 @@ export default function Home() {
         {/* Hero — the demo IS the product */}
         <section className="px-6 pt-20 pb-16">
           <div className="max-w-4xl mx-auto text-center mb-12">
+            <div className="flex justify-center mb-6">
+              <Shrinkray size={100} className="animate-bounce-slow" />
+            </div>
             <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight text-text leading-tight">
               Same AI, fewer tokens.
               <span className="text-savings"> Ship smarter.</span>
@@ -147,6 +151,7 @@ const res = await openai.chat.completions.create({
               <Link href="/providers" className="hover:text-text transition-colors">Providers</Link>
               <Link href="/terms" className="hover:text-text transition-colors">Terms</Link>
               <Link href="/privacy" className="hover:text-text transition-colors">Privacy</Link>
+              <a href="https://apiguardrails.com" className="hover:text-text transition-colors">API Guardrails</a>
               <a href="https://github.com/chatde/tokenshrink" className="hover:text-text transition-colors">GitHub</a>
             </div>
           </div>
