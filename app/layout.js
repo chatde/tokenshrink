@@ -13,7 +13,7 @@ export const metadata = {
     type: 'website',
   },
   twitter: {
-    card: 'summary',
+    card: 'summary_large_image',
     title: 'TokenShrink — Same AI, Fewer Tokens. Ship Smarter.',
     description: 'Your prompts are verbose. Your models don\'t need them to be. Compress prompts — same results, fewer tokens. Free forever.',
   },
