@@ -2,7 +2,27 @@
 
 import { useState, useCallback } from 'react';
 
-const SAMPLE_PROMPT = `You are an advanced AI assistant specialized in software engineering. Your primary responsibility is to help developers write clean, maintainable, and efficient code. When responding to questions about programming, you should provide detailed explanations along with code examples. Always consider best practices, design patterns, and potential edge cases in your responses. If the user asks about a specific programming language or framework, tailor your response to that technology. You should also be aware of common security vulnerabilities and suggest secure coding practices. When debugging, walk through the code step by step and explain your reasoning process. For complex problems, break them down into smaller, manageable pieces and address each one systematically. Remember to consider performance implications and suggest optimizations where appropriate. If you are unsure about something, acknowledge it honestly rather than providing potentially incorrect information.`;
+const SAMPLE_PROMPT = `You are an expert full-stack development assistant. Your primary responsibility is to help engineers build, debug, and deploy production-ready applications. Your main task is to provide clear guidance on architecture, authentication, database design, API development, and deployment configuration.
+
+You should always write clean, well-structured code. You should include comprehensive error handling in every function. You should follow established design patterns and best practices. You should write unit tests for all critical paths. You should document all public interfaces with clear descriptions of parameters and return values.
+
+It is important to consider security at every layer of the application. It is important to validate all user input before processing. It is important to sanitize data before storing it in the database. It is important to use parameterized queries to prevent SQL injection. It is important to implement proper authentication and authorization checks on every endpoint.
+
+Please make sure to explain your reasoning before writing code. Please make sure to break complex problems into smaller, manageable steps. Please make sure to consider edge cases and failure modes. Please make sure to provide working code examples that can be run immediately.
+
+When reviewing code, you should identify potential security vulnerabilities such as injection attacks, authentication bypasses, and authorization flaws. You should suggest performance optimizations for database queries, caching strategies, and middleware configuration. You should recommend improvements to error handling, logging, and monitoring.
+
+In order to maintain code quality, you must follow consistent naming conventions across the codebase. You must write meaningful commit messages that describe the change and its purpose. You must ensure all dependencies are up to date and free of known vulnerabilities. You must implement proper logging for debugging and audit purposes.
+
+It is essential to design APIs with clear documentation including request parameters, response formats, and example usage. It is essential to implement rate limiting and pagination for all public endpoints. It is essential to use environment variables for all configuration values rather than hardcoding them. It is essential to set up proper error monitoring and alerting for production systems.
+
+For the purpose of debugging, you should walk through the code step by step and explain what each section does. For the purpose of testing, you should write both unit tests and integration tests. For the purpose of deployment, you should provide clear instructions for development and production environments.
+
+You are responsible for identifying potential bottlenecks in the application architecture. You are responsible for recommending appropriate caching strategies. You are responsible for ensuring the application handles high traffic gracefully. You are responsible for documenting the infrastructure and deployment procedures.
+
+Remember to consider performance optimization in every implementation. Do not forget to include migration scripts for database schema changes. Do not forget to document all environment variables and their expected values. Be sure to include health check endpoints for monitoring.
+
+If you are unsure about something, acknowledge it honestly rather than providing incorrect information. If you are not sure about the best approach, present multiple options with their tradeoffs.`;
 
 export default function CompressorWidget() {
   const [input, setInput] = useState('');
@@ -10,7 +30,6 @@ export default function CompressorWidget() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [copied, setCopied] = useState(false);
-
   const handleShrink = useCallback(async () => {
     const text = input.trim();
     if (!text) return;
@@ -53,10 +72,31 @@ export default function CompressorWidget() {
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const handleTrySample = () => {
+  const handleTrySample = async () => {
     setInput(SAMPLE_PROMPT);
     setResult(null);
     setError('');
+    setLoading(true);
+
+    try {
+      const res = await fetch('/api/compress', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text: SAMPLE_PROMPT }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        setError(data.error || 'Compression failed');
+        return;
+      }
+
+      setResult(data);
+    } catch {
+      setError('Network error — please try again');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const wordCount = input.trim().split(/\s+/).filter(Boolean).length;
@@ -123,18 +163,19 @@ export default function CompressorWidget() {
           {result.stats.tooShort || result.stats.belowThreshold ? (
             <div className="p-4 bg-bg-card border border-border rounded-lg text-text-secondary text-sm">
               {result.stats.tooShort
-                ? 'This text is too short for compression. Try a longer prompt (50+ words) for meaningful savings.'
-                : 'Compression savings are below 20% for this text. The original is more efficient.'}
+                ? 'This text is too short for compression. Try a longer prompt (30+ words) for meaningful savings.'
+                : 'Compression savings are minimal for this text. Try a longer prompt with more natural language.'}
             </div>
           ) : (
             <>
               {/* Savings banner */}
               <div className="text-center mb-6">
                 <div className="text-3xl font-bold text-savings animate-pulse-savings">
-                  You just saved ${result.stats.dollarsSaved.toFixed(2)}
+                  {result.stats.tokensSaved.toLocaleString()} tokens saved
                 </div>
                 <div className="text-sm text-text-muted mt-1">
-                  {result.stats.tokensSaved.toLocaleString()} tokens &middot; {result.stats.ratio}x compression
+                  {result.stats.ratio}x compression &middot; {result.stats.originalWords} &rarr; {result.stats.totalCompressedWords} words
+                  {result.stats.dollarsSaved > 0.005 && ` · $${result.stats.dollarsSaved.toFixed(2)} saved`}
                 </div>
               </div>
 
@@ -149,9 +190,7 @@ export default function CompressorWidget() {
                     </span>
                   </div>
                   <div className="p-4 max-h-64 overflow-y-auto">
-                    <pre className="text-xs text-text-secondary font-mono whitespace-pre-wrap break-words">
-                      {input}
-                    </pre>
+                    <pre className="text-xs text-text-secondary font-mono whitespace-pre-wrap break-words">{input}</pre>
                   </div>
                 </div>
 
@@ -164,9 +203,7 @@ export default function CompressorWidget() {
                     </span>
                   </div>
                   <div className="p-4 max-h-64 overflow-y-auto">
-                    <pre className="text-xs text-text-secondary font-mono whitespace-pre-wrap break-words">
-                      {result.compressed}
-                    </pre>
+                    <pre className="text-xs text-text-secondary font-mono whitespace-pre-wrap break-words">{result.compressed}</pre>
                   </div>
                 </div>
               </div>

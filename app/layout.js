@@ -2,20 +2,20 @@ import './globals.css';
 import Providers from './components/Providers';
 
 export const metadata = {
-  title: 'TokenShrink — Save 60-80% on AI Token Costs',
-  description: 'Compress your AI prompts and save money on every API call. Works with OpenAI, Anthropic, Google, and more.',
+  title: 'TokenShrink — Same AI, Fewer Tokens. Ship Smarter.',
+  description: 'Your prompts are verbose. Your models don\'t need them to be. TokenShrink compresses prompts — same results, fewer tokens. Free forever.',
   keywords: ['AI', 'tokens', 'compression', 'LLM', 'OpenAI', 'cost savings', 'prompt optimization'],
   openGraph: {
-    title: 'TokenShrink — Save 60-80% on AI Token Costs',
-    description: 'Compress your AI prompts and save money on every API call.',
+    title: 'TokenShrink — Same AI, Fewer Tokens. Ship Smarter.',
+    description: 'Your prompts are verbose. Your models don\'t need them to be. Compress prompts — same results, fewer tokens. Free forever.',
     url: 'https://tokenshrink.com',
     siteName: 'TokenShrink',
     type: 'website',
   },
   twitter: {
-    card: 'summary_large_image',
-    title: 'TokenShrink — Save 60-80% on AI Token Costs',
-    description: 'Compress your AI prompts and save money on every API call.',
+    card: 'summary',
+    title: 'TokenShrink — Same AI, Fewer Tokens. Ship Smarter.',
+    description: 'Your prompts are verbose. Your models don\'t need them to be. Compress prompts — same results, fewer tokens. Free forever.',
   },
 };
 

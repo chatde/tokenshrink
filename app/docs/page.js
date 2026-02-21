@@ -23,7 +23,7 @@ export default function DocsPage() {
               <div className="bg-bg-card border border-border rounded-xl p-5">
                 <h3 className="text-sm font-medium text-savings mb-3">1. Get your API key</h3>
                 <p className="text-sm text-text-secondary">
-                  Sign up for a Pro plan, then generate an API key from your{' '}
+                  Sign up (free), then generate an API key from your{' '}
                   <a href="/dashboard" className="text-savings hover:underline">dashboard</a>.
                 </p>
               </div>
@@ -144,20 +144,16 @@ const openai = ts.wrapOpenAI(new OpenAI());
                   <span className="text-text font-medium">10</span>
                 </div>
                 <div className="flex justify-between">
-                  <span>Anonymous words (no account)</span>
-                  <span className="text-text font-medium">500 total</span>
+                  <span>Words per request</span>
+                  <span className="text-text font-medium">100,000</span>
                 </div>
                 <div className="flex justify-between">
-                  <span>Free plan words/month</span>
-                  <span className="text-text font-medium">5,000</span>
+                  <span>Monthly limit</span>
+                  <span className="text-text font-medium">Unlimited</span>
                 </div>
                 <div className="flex justify-between">
-                  <span>Pro plan words/month</span>
-                  <span className="text-text font-medium">250,000</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>Team plan words/month</span>
-                  <span className="text-text font-medium">1,000,000</span>
+                  <span>Price</span>
+                  <span className="text-savings font-medium">Free forever</span>
                 </div>
               </div>
             </div>

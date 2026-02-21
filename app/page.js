@@ -1,7 +1,5 @@
 import Navbar from './components/Navbar';
 import CompressorWidget from './components/CompressorWidget';
-import PricingTable from './components/PricingTable';
-import SavingsCalculator from './components/SavingsCalculator';
 import Link from 'next/link';
 
 export default function Home() {
@@ -14,13 +12,13 @@ export default function Home() {
         <section className="px-6 pt-20 pb-16">
           <div className="max-w-4xl mx-auto text-center mb-12">
             <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight text-text leading-tight">
-              Stop overpaying for
-              <span className="text-savings"> AI tokens</span>
+              Same AI, fewer tokens.
+              <span className="text-savings"> Ship smarter.</span>
             </h1>
             <p className="mt-4 text-lg text-text-secondary max-w-2xl mx-auto">
-              Paste your prompt. We compress it. You save 60-80% on every API call.
+              Your prompts are verbose. Your models don&apos;t need them to be.
               <br />
-              Works with OpenAI, Anthropic, Google, and every LLM provider.
+              TokenShrink compresses prompts — same results, fewer tokens. Free forever.
             </p>
           </div>
 
@@ -47,8 +45,8 @@ export default function Home() {
                 },
                 {
                   step: '3',
-                  title: 'Save money',
-                  desc: 'Use the compressed version in your API calls. Same AI quality, 60-80% fewer tokens.',
+                  title: 'Use fewer tokens',
+                  desc: 'Use the compressed version in your API calls. Same AI quality, fewer tokens.',
                 },
               ].map(({ step, title, desc }) => (
                 <div key={step} className="text-center">
@@ -68,9 +66,9 @@ export default function Home() {
           <div className="max-w-4xl mx-auto">
             <div className="grid grid-cols-3 gap-8 text-center">
               {[
-                { value: '6-10x', label: 'Compression ratio' },
+                { value: '100%', label: 'Free forever' },
                 { value: '< 200ms', label: 'Processing time' },
-                { value: '$0', label: 'To get started' },
+                { value: 'All LLMs', label: 'Compatible' },
               ].map(({ value, label }) => (
                 <div key={label}>
                   <div className="text-3xl font-bold text-savings">{value}</div>
@@ -79,30 +77,6 @@ export default function Home() {
               ))}
             </div>
           </div>
-        </section>
-
-        {/* Savings calculator */}
-        <section className="px-6 py-20 border-t border-border">
-          <div className="max-w-4xl mx-auto text-center mb-8">
-            <h2 className="text-2xl font-bold text-text">
-              What if you saved this on <span className="text-savings">every</span> API call?
-            </h2>
-            <p className="text-sm text-text-secondary mt-2">
-              See your potential monthly savings based on current AI spend
-            </p>
-          </div>
-          <SavingsCalculator />
-        </section>
-
-        {/* Pricing */}
-        <section id="pricing" className="px-6 py-20 border-t border-border bg-bg-secondary">
-          <div className="text-center mb-12">
-            <h2 className="text-2xl font-bold text-text">Simple pricing</h2>
-            <p className="text-sm text-text-secondary mt-2">
-              Pay for words processed. Start free, upgrade when you need more.
-            </p>
-          </div>
-          <PricingTable />
         </section>
 
         {/* SDK / Developer section */}
@@ -134,7 +108,7 @@ const res = await openai.chat.completions.create({
   model: 'gpt-4o',
   messages: [{ role: 'system', content: longPrompt }],
 });
-// Console: [TokenShrink] Saved 847 tokens (6.2x)`}</code>
+// Console: [TokenShrink] Saved 42 tokens`}</code>
               </pre>
             </div>
 
@@ -149,16 +123,16 @@ const res = await openai.chat.completions.create({
         {/* CTA */}
         <section className="px-6 py-20 border-t border-border bg-bg-secondary text-center">
           <h2 className="text-3xl font-bold text-text mb-4">
-            Start saving on AI costs today
+            Compress your prompts for free
           </h2>
           <p className="text-text-secondary mb-8">
-            No credit card required. 5,000 words free every month.
+            No credit card. No limits. No catch. Free forever.
           </p>
           <Link
             href="/login"
             className="inline-block px-8 py-3 bg-savings text-bg font-semibold rounded-lg hover:bg-savings/90 transition-all text-sm"
           >
-            Get started free
+            Get started
           </Link>
         </section>
 
@@ -166,11 +140,13 @@ const res = await openai.chat.completions.create({
         <footer className="px-6 py-8 border-t border-border">
           <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
             <div className="text-sm text-text-muted">
-              Token<span className="text-savings">Shrink</span> &mdash; Save on every API call
+              Token<span className="text-savings">Shrink</span> &mdash; Same AI, fewer tokens. Free forever.
             </div>
             <div className="flex items-center gap-6 text-xs text-text-muted">
               <Link href="/docs" className="hover:text-text transition-colors">Docs</Link>
-              <Link href="/pricing" className="hover:text-text transition-colors">Pricing</Link>
+              <Link href="/providers" className="hover:text-text transition-colors">Providers</Link>
+              <Link href="/terms" className="hover:text-text transition-colors">Terms</Link>
+              <Link href="/privacy" className="hover:text-text transition-colors">Privacy</Link>
               <a href="https://github.com/chatde/tokenshrink" className="hover:text-text transition-colors">GitHub</a>
             </div>
           </div>

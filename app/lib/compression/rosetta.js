@@ -1,20 +1,33 @@
 // Rosetta Stone generator — creates the decoder header that teaches LLMs the abbreviations
+import { UNIVERSAL_ABBREVIATIONS } from './dictionaries';
 
 export function generateRosetta(replacements, patternReplacements = []) {
-  if (replacements.length === 0 && patternReplacements.length === 0) {
+  // Filter out universal abbreviations — LLMs already understand these
+  const filtered = replacements.filter(({ replacement }) => {
+    return !UNIVERSAL_ABBREVIATIONS.has(replacement);
+  });
+
+  // Only include entries where net savings are positive
+  // A Rosetta entry costs ~2 words (e.g. "fn=function"). Only include if it saves more than that.
+  const netPositive = filtered.filter(({ original, replacement, occurrences }) => {
+    const entryCost = 2; // approximate words for one Rosetta line
+    const savedPerOccurrence = original.split(/\s+/).length - replacement.split(/\s+/).length;
+    const count = occurrences || 1;
+    return (savedPerOccurrence * count) > entryCost;
+  });
+
+  if (netPositive.length === 0 && patternReplacements.length === 0) {
     return '';
   }
 
   const lines = ['[DECODE]'];
 
-  // Word/phrase abbreviations
-  if (replacements.length > 0) {
-    for (const { original, replacement } of replacements) {
+  if (netPositive.length > 0) {
+    for (const { original, replacement } of netPositive) {
       lines.push(`${replacement}=${original}`);
     }
   }
 
-  // Pattern codes (P1, P2, etc.)
   if (patternReplacements.length > 0) {
     for (const { code, phrase } of patternReplacements) {
       lines.push(`${code}="${phrase}"`);

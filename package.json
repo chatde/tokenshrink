@@ -1,7 +1,7 @@
 {
   "name": "tokenshrink",
   "version": "1.0.0",
-  "description": "AI prompt compression as a service — save 60-80% on token costs",
+  "description": "Same AI, fewer tokens. Free forever. — tokenshrink.com",
   "scripts": {
     "dev": "next dev",
     "build": "next build",

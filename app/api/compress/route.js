@@ -2,16 +2,12 @@ import { NextResponse } from 'next/server';
 import { auth } from '@/app/lib/auth';
 import { db } from '@/app/lib/db';
 import { compressions, usageMeters, users, apiKeys } from '@/schema/schema';
-import { eq, and } from 'drizzle-orm';
+import { eq, and, isNull } from 'drizzle-orm';
 import { compress } from '@/app/lib/compression/engine';
 import { validateCompressionInput } from '@/app/lib/validate';
 import {
   getPlan,
-  countWords,
   getCurrentPeriod,
-  ANONYMOUS_WORD_LIMIT,
-  wordsToTokens,
-  tokensToDollars,
 } from '@/app/lib/billing';
 import { createHash } from 'crypto';
 
@@ -22,8 +18,8 @@ export async function POST(request) {
 
     // Determine user — check API key first, then session
     let userId = null;
-    let plan = 'free';
-    let maxWordsPerShrink = 1000;
+    let apiKeyId = null;
+    const maxWordsPerShrink = getPlan('free').maxWordsPerShrink;
 
     const apiKey = request.headers.get('x-api-key');
     if (apiKey) {
@@ -31,12 +27,14 @@ export async function POST(request) {
       const keyRecord = await db
         .select()
         .from(apiKeys)
-        .where(and(eq(apiKeys.keyHash, keyHash), eq(apiKeys.revokedAt, null)))
+        .where(and(eq(apiKeys.keyHash, keyHash), isNull(apiKeys.revokedAt)))
         .limit(1);
 
       if (keyRecord.length === 0) {
         return NextResponse.json({ error: 'Invalid API key' }, { status: 401 });
       }
+
+      apiKeyId = keyRecord[0].id;
 
       const user = await db
         .select()
@@ -46,18 +44,11 @@ export async function POST(request) {
 
       if (user.length > 0) {
         userId = user[0].id;
-        plan = user[0].plan;
-        maxWordsPerShrink = getPlan(plan).maxWordsPerShrink;
       }
     } else {
       const session = await auth();
       if (session?.user?.id) {
         userId = session.user.id;
-        plan = session.user.plan || 'free';
-        maxWordsPerShrink = getPlan(plan).maxWordsPerShrink;
-      } else {
-        // Anonymous — very limited
-        maxWordsPerShrink = ANONYMOUS_WORD_LIMIT;
       }
     }
 
@@ -65,29 +56,6 @@ export async function POST(request) {
     const validation = validateCompressionInput(text, maxWordsPerShrink);
     if (!validation.valid) {
       return NextResponse.json({ error: validation.error }, { status: 400 });
-    }
-
-    // Check quota for authenticated users
-    if (userId) {
-      const period = getCurrentPeriod();
-      const planLimits = getPlan(plan);
-      const usage = await db
-        .select()
-        .from(usageMeters)
-        .where(and(eq(usageMeters.userId, userId), eq(usageMeters.period, period)))
-        .limit(1);
-
-      const wordsUsed = usage.length > 0 ? usage[0].wordsProcessed : 0;
-      if (wordsUsed + validation.words > planLimits.wordsPerMonth) {
-        return NextResponse.json({
-          error: `Monthly quota exceeded. You've used ${wordsUsed.toLocaleString()} of ${planLimits.wordsPerMonth.toLocaleString()} words. Upgrade your plan for more.`,
-          quota: {
-            used: wordsUsed,
-            limit: planLimits.wordsPerMonth,
-            plan,
-          },
-        }, { status: 429 });
-      }
     }
 
     // Compress
@@ -133,6 +101,14 @@ export async function POST(request) {
           tokensSaved: result.stats.tokensSaved,
           dollarsSaved: result.stats.dollarsSaved,
         });
+      }
+
+      // Update lastUsedAt on API key
+      if (apiKeyId) {
+        await db
+          .update(apiKeys)
+          .set({ lastUsedAt: new Date() })
+          .where(eq(apiKeys.id, apiKeyId));
       }
     }
 

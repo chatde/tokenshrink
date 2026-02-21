@@ -2,39 +2,13 @@ export const PLANS = {
   free: {
     name: 'Free',
     price: 0,
-    wordsPerMonth: 5000,
-    maxWordsPerShrink: 1000,
-    features: ['Web compressor', '5,000 words/month', 'See your savings'],
-  },
-  pro: {
-    name: 'Pro',
-    price: 19,
-    wordsPerMonth: 250000,
-    maxWordsPerShrink: 10000,
-    features: [
-      'Everything in Free',
-      '250,000 words/month',
-      'API access + SDK',
-      'Usage dashboard',
-      'Priority support',
-    ],
-  },
-  team: {
-    name: 'Team',
-    price: 79,
-    wordsPerMonth: 1000000,
-    maxWordsPerShrink: 50000,
-    features: [
-      'Everything in Pro',
-      '1,000,000 words/month',
-      '5 team seats',
-      'Proxy mode',
-      'Custom dictionaries',
-    ],
+    wordsPerMonth: 999999999,
+    maxWordsPerShrink: 100000,
+    features: ['Web compressor', 'Unlimited words', 'API access + SDK', 'Usage dashboard'],
   },
 };
 
-export const ANONYMOUS_WORD_LIMIT = 500;
+export const ANONYMOUS_WORD_LIMIT = 100000;
 export const RATE_LIMIT_PER_MINUTE = 10;
 
 // Average cost per 1K tokens across major providers (input)
