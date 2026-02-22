@@ -31,11 +31,6 @@ export async function POST(request) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  // Only Pro and Team users can create API keys
-  if (!session.user.plan || session.user.plan === 'free') {
-    return NextResponse.json({ error: 'API keys require a Pro or Team plan' }, { status: 403 });
-  }
-
   const { label } = await request.json();
 
   // Generate key: ts_live_<32 random hex chars>
