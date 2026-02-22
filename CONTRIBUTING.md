@@ -19,17 +19,31 @@ Thanks for your interest in contributing!
 
 ## Compression dictionaries
 
-The compression engine lives in `app/lib/compression/`. The main files:
+The compression engine lives in both `sdk/src/` (npm package) and `app/lib/compression/` (website). Keep them in sync.
 
+Key files:
 - `dictionaries.js` — word and phrase abbreviation mappings
-- `engine.js` — the 4-phase compression pipeline
+- `engine.js` — the 4-phase compression pipeline (token-aware in v2.0)
 - `rosetta.js` — generates the decoder header for LLMs
 - `strategies.js` — auto-detects content domain
+- `token-costs.js` — precomputed token costs (auto-generated, DO NOT EDIT)
+- `utils.js` / `billing.js` — `countTokens()`, `replacementTokenSavings()`
 
 When adding new abbreviations, make sure:
+- The replacement **actually saves tokens** — run `node scripts/generate-token-costs.mjs` to verify
 - The abbreviation is unambiguous in context
 - If it's universally understood by LLMs, add it to `UNIVERSAL_ABBREVIATIONS`
 - If not universal, the Rosetta Stone header will include a decoder entry automatically
+- After changing dictionaries, regenerate token-costs.js: `node scripts/generate-token-costs.mjs`
+
+## Testing
+
+```bash
+npm test          # run all 51 tests
+npm run test:watch  # watch mode
+```
+
+Tests cover: compression engine, Rosetta Stone, domain detection, billing/token counting, and token cost verification.
 
 ## Pull requests
 
