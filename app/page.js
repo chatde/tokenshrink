@@ -70,7 +70,7 @@ export default function Home() {
           <div className="max-w-4xl mx-auto">
             <div className="grid grid-cols-3 gap-8 text-center">
               {[
-                { value: '100%', label: 'Free forever' },
+                { value: '~12%', label: 'Avg token savings' },
                 { value: '< 200ms', label: 'Processing time' },
                 { value: 'All LLMs', label: 'Compatible' },
               ].map(({ value, label }) => (
@@ -149,6 +149,7 @@ const res = await openai.chat.completions.create({
             </div>
             <div className="flex items-center gap-6 text-xs text-text-muted">
               <Link href="/docs" className="hover:text-text transition-colors">Docs</Link>
+              <Link href="/pricing" className="hover:text-text transition-colors">Pricing</Link>
               <Link href="/providers" className="hover:text-text transition-colors">Providers</Link>
               <Link href="/terms" className="hover:text-text transition-colors">Terms</Link>
               <Link href="/privacy" className="hover:text-text transition-colors">Privacy</Link>

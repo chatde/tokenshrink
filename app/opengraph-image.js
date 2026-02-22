@@ -67,7 +67,7 @@ export default function Image() {
           </span>
           <span style={{ color: '#3f3f46' }}>|</span>
           <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <span style={{ color: '#10b981', fontWeight: 700 }}>&lt;1ms</span> processing
+            <span style={{ color: '#10b981', fontWeight: 700 }}>&lt; 200ms</span> processing
           </span>
           <span style={{ color: '#3f3f46' }}>|</span>
           <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
