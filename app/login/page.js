@@ -49,7 +49,7 @@ export default function LoginPage() {
         </div>
 
         <p className="text-xs text-text-muted text-center mt-4">
-          Free account includes 5,000 words/month
+          Free forever. No limits, no credit card, no catch.
         </p>
       </div>
     </div>
