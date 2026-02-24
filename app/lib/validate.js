@@ -15,8 +15,8 @@ export function validateCompressionInput(text, maxWords) {
   }
 
   const words = countWords(trimmed);
-  if (words < 10) {
-    return { valid: false, error: 'Text must be at least 10 words' };
+  if (words < 30) {
+    return { valid: false, error: 'Text must be at least 30 words for meaningful compression' };
   }
 
   if (words > maxWords) {

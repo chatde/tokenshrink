@@ -107,7 +107,7 @@ export default function CompressorWidget() {
       <div className="relative">
         <textarea
           value={input}
-          onChange={(e) => setInput(e.target.value)}
+          onChange={(e) => { setInput(e.target.value); setResult(null); }}
           onKeyDown={handleKeyDown}
           placeholder="Paste your prompt, system message, or any text..."
           className="w-full h-48 p-5 bg-bg-card border border-border rounded-xl text-text font-mono text-sm resize-none focus:outline-none focus:border-savings/50 focus:ring-1 focus:ring-savings/20 transition-all placeholder:text-text-muted"

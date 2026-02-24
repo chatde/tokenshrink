@@ -31,7 +31,8 @@ export function generateRosetta(replacements, patternReplacements = [], tokenize
 
   if (patternReplacements.length > 0) {
     for (const { code, phrase } of patternReplacements) {
-      lines.push(`${code}="${phrase}"`);
+      const escaped = phrase.replace(/"/g, '\\"');
+      lines.push(`${code}="${escaped}"`);
     }
   }
 
