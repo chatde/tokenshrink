@@ -13,8 +13,8 @@
   --color-text: #fafafa;
   --color-text-secondary: #a1a1aa;
   --color-text-muted: #71717a;
-  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
-  --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+  --font-sans: var(--font-geist-sans), system-ui, -apple-system, sans-serif;
+  --font-mono: var(--font-geist-mono), 'Fira Code', monospace;
 }
 
 body {
@@ -69,7 +69,11 @@ body {
   animation: bounce-slow 3s ease-in-out infinite;
 }
 
-/* Scrollbar */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-border) var(--color-bg);
+}
+
 ::-webkit-scrollbar {
   width: 6px;
 }

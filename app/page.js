@@ -10,8 +10,10 @@ export default function Home() {
 
       <main className="pt-14">
         {/* Hero — the demo IS the product */}
-        <section className="px-6 pt-20 pb-16">
-          <div className="max-w-4xl mx-auto text-center mb-12">
+        <section className="px-6 pt-20 pb-16 relative">
+          <div className="absolute top-[-60px] left-1/2 -translate-x-1/2 w-[500px] h-[300px] bg-savings/5 rounded-full blur-[100px] pointer-events-none" />
+
+          <div className="max-w-4xl mx-auto text-center mb-12 relative">
             <div className="flex justify-center mb-6">
               <Shrinkray size={100} className="animate-bounce-slow" />
             </div>
@@ -32,31 +34,31 @@ export default function Home() {
         {/* How it works */}
         <section className="px-6 py-20 border-t border-border">
           <div className="max-w-4xl mx-auto">
-            <h2 className="text-2xl font-bold text-text text-center mb-12">
-              How it works
-            </h2>
+            <div className="flex items-center gap-3 mb-12">
+              <div className="h-px flex-1 bg-border" />
+              <h2 className="text-xl font-semibold text-text-secondary">How It Works</h2>
+              <div className="h-px flex-1 bg-border" />
+            </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               {[
                 {
-                  step: '1',
+                  step: '01',
                   title: 'Paste your prompt',
                   desc: 'System messages, user prompts, documents — anything you send to an LLM.',
                 },
                 {
-                  step: '2',
+                  step: '02',
                   title: 'We compress it',
                   desc: 'Our engine replaces verbose phrases with short codes and prepends a tiny decoder header.',
                 },
                 {
-                  step: '3',
+                  step: '03',
                   title: 'Use fewer tokens',
                   desc: 'Use the compressed version in your API calls. Same AI quality, fewer tokens.',
                 },
               ].map(({ step, title, desc }) => (
-                <div key={step} className="text-center">
-                  <div className="w-10 h-10 rounded-full bg-savings/10 border border-savings/20 text-savings font-bold text-lg flex items-center justify-center mx-auto mb-4">
-                    {step}
-                  </div>
+                <div key={step} className="bg-bg-card border border-border rounded-xl p-6 hover:border-border-hover transition-colors">
+                  <div className="text-3xl font-bold text-savings/20 mb-3 font-mono">{step}</div>
                   <h3 className="text-base font-semibold text-text mb-2">{title}</h3>
                   <p className="text-sm text-text-secondary">{desc}</p>
                 </div>
@@ -86,9 +88,11 @@ export default function Home() {
         {/* SDK / Developer section */}
         <section className="px-6 py-20 border-t border-border">
           <div className="max-w-3xl mx-auto">
-            <h2 className="text-2xl font-bold text-text text-center mb-4">
-              Drop-in SDK for developers
-            </h2>
+            <div className="flex items-center gap-3 mb-8">
+              <div className="h-px flex-1 bg-border" />
+              <h2 className="text-xl font-semibold text-text-secondary">Drop-in SDK</h2>
+              <div className="h-px flex-1 bg-border" />
+            </div>
             <p className="text-sm text-text-secondary text-center mb-8">
               Two lines of code. Automatic compression on every API call.
             </p>
@@ -142,18 +146,23 @@ const res = await openai.chat.completions.create({
         </section>
 
         {/* Footer */}
-        <footer className="px-6 py-8 border-t border-border">
+        <footer className="px-6 py-10 border-t border-border">
           <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
-            <div className="text-sm text-text-muted">
-              Token<span className="text-savings">Shrink</span> &mdash; Same AI, fewer tokens. Free forever.
+            <div className="flex items-center gap-2 text-sm text-text-muted">
+              <span>Token<span className="text-savings">Shrink</span></span>
+              <span className="text-border">&middot;</span>
+              <span>&copy; {new Date().getFullYear()}</span>
+              <span className="text-border">&middot;</span>
+              <span>Free forever</span>
             </div>
-            <div className="flex items-center gap-6 text-xs text-text-muted">
+            <div className="flex items-center gap-5 text-xs text-text-muted">
               <Link href="/docs" className="hover:text-text transition-colors">Docs</Link>
               <Link href="/providers" className="hover:text-text transition-colors">Providers</Link>
               <Link href="/terms" className="hover:text-text transition-colors">Terms</Link>
               <Link href="/privacy" className="hover:text-text transition-colors">Privacy</Link>
-              <a href="https://apiguardrails.com" className="hover:text-text transition-colors">API Guardrails</a>
-              <a href="https://github.com/chatde/tokenshrink" className="hover:text-text transition-colors">GitHub</a>
+              <a href="https://apiguardrails.com" target="_blank" rel="noopener noreferrer" className="hover:text-text transition-colors">API Guardrails</a>
+              <a href="https://github.com/chatde/tokenshrink" target="_blank" rel="noopener noreferrer" className="hover:text-text transition-colors">GitHub</a>
+              <a href="https://chatde.dev" target="_blank" rel="noopener noreferrer" className="hover:text-text transition-colors">chatde.dev</a>
             </div>
           </div>
         </footer>
