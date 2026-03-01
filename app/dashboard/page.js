@@ -62,7 +62,7 @@ function DashboardContent() {
         fetchKeys();
       }
     } catch (e) {
-      console.error(e);
+      alert("Failed to create API key. Please try again.");
     } finally {
       setCreating(false);
     }
@@ -77,7 +77,7 @@ function DashboardContent() {
       });
       fetchKeys();
     } catch (e) {
-      console.error(e);
+      alert("Failed to revoke key. Please try again.");
     }
   };
 
