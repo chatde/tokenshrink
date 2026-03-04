@@ -32,15 +32,18 @@ export async function GET() {
 
   const currentUsage = usage.find((u) => u.period === period);
 
-  return NextResponse.json({
-    plan: session.user.plan || 'free',
-    currentPeriod: period,
-    wordsUsed: currentUsage?.wordsProcessed || 0,
-    wordsLimit: plan.wordsPerMonth,
-    compressionCount: currentUsage?.compressionCount || 0,
-    tokensSaved: currentUsage?.tokensSaved || 0,
-    dollarsSaved: currentUsage?.dollarsSaved || 0,
-    history: usage,
-    recentCompressions,
-  });
+  return NextResponse.json(
+    {
+      plan: session.user.plan || 'free',
+      currentPeriod: period,
+      wordsUsed: currentUsage?.wordsProcessed || 0,
+      wordsLimit: plan.wordsPerMonth,
+      compressionCount: currentUsage?.compressionCount || 0,
+      tokensSaved: currentUsage?.tokensSaved || 0,
+      dollarsSaved: currentUsage?.dollarsSaved || 0,
+      history: usage,
+      recentCompressions,
+    },
+    { headers: { 'Cache-Control': 's-maxage=60, stale-while-revalidate=300' } },
+  );
 }

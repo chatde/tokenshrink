@@ -67,12 +67,15 @@ export function detectStrategy(text) {
 
 // Detect repeated phrases for pattern strategy
 export function findRepeatedPhrases(text, minLength = 3, minOccurrences = 2) {
-  const words = text.split(/\s+/);
+  const words = text.toLowerCase().split(/\s+/);
   const phrases = {};
+  const maxLen = Math.min(6, words.length);
 
-  for (let len = minLength; len <= Math.min(8, words.length); len++) {
-    for (let i = 0; i <= words.length - len; i++) {
-      const phrase = words.slice(i, i + len).join(' ').toLowerCase();
+  for (let i = 0; i <= words.length - minLength; i++) {
+    let phrase = words.slice(i, i + minLength).join(' ');
+    phrases[phrase] = (phrases[phrase] || 0) + 1;
+    for (let len = minLength + 1; len <= maxLen && i + len <= words.length; len++) {
+      phrase = phrase + ' ' + words[i + len - 1];
       phrases[phrase] = (phrases[phrase] || 0) + 1;
     }
   }

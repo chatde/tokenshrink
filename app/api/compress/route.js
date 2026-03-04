@@ -24,27 +24,22 @@ export async function POST(request) {
     const apiKey = request.headers.get('x-api-key');
     if (apiKey) {
       const keyHash = createHash('sha256').update(apiKey).digest('hex');
-      const keyRecord = await db
-        .select()
+      const result = await db
+        .select({
+          apiKeyId: apiKeys.id,
+          userId: users.id,
+        })
         .from(apiKeys)
+        .innerJoin(users, eq(apiKeys.userId, users.id))
         .where(and(eq(apiKeys.keyHash, keyHash), isNull(apiKeys.revokedAt)))
         .limit(1);
 
-      if (keyRecord.length === 0) {
+      if (result.length === 0) {
         return NextResponse.json({ error: 'Invalid API key' }, { status: 401 });
       }
 
-      apiKeyId = keyRecord[0].id;
-
-      const user = await db
-        .select()
-        .from(users)
-        .where(eq(users.id, keyRecord[0].userId))
-        .limit(1);
-
-      if (user.length > 0) {
-        userId = user[0].id;
-      }
+      apiKeyId = result[0].apiKeyId;
+      userId = result[0].userId;
     } else {
       const session = await auth();
       if (session?.user?.id) {

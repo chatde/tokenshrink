@@ -2,9 +2,7 @@ import { NextResponse } from 'next/server';
 import { db } from '@/app/lib/db';
 import { users, subscriptions } from '@/schema/schema';
 import { eq } from 'drizzle-orm';
-import Stripe from 'stripe';
-
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+import { getStripe } from '@/app/lib/stripe';
 
 export async function POST(request) {
   const body = await request.text();
@@ -12,7 +10,7 @@ export async function POST(request) {
 
   let event;
   try {
-    event = stripe.webhooks.constructEvent(body, sig, process.env.STRIPE_WEBHOOK_SECRET);
+    event = getStripe().webhooks.constructEvent(body, sig, process.env.STRIPE_WEBHOOK_SECRET);
   } catch (err) {
     console.error('Webhook signature verification failed:', err.message);
     return NextResponse.json({ error: 'Invalid signature' }, { status: 400 });
@@ -31,7 +29,7 @@ export async function POST(request) {
 
         // Store subscription
         if (session.subscription) {
-          const sub = await stripe.subscriptions.retrieve(session.subscription);
+          const sub = await getStripe().subscriptions.retrieve(session.subscription);
           await db
             .insert(subscriptions)
             .values({

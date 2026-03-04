@@ -1,4 +1,4 @@
-const { pgTable, text, integer, timestamp, real, varchar, uniqueIndex } = require('drizzle-orm/pg-core');
+const { pgTable, text, integer, timestamp, real, varchar, uniqueIndex, index } = require('drizzle-orm/pg-core');
 const { sql } = require('drizzle-orm');
 
 const users = pgTable('users', {
@@ -22,7 +22,9 @@ const apiKeys = pgTable('api_keys', {
   lastUsedAt: timestamp('last_used_at'),
   revokedAt: timestamp('revoked_at'),
   createdAt: timestamp('created_at').defaultNow().notNull(),
-});
+}, (table) => [
+  index('api_keys_key_hash_idx').on(table.keyHash),
+]);
 
 const compressions = pgTable('compressions', {
   id: text('id').primaryKey().$defaultFn(() => crypto.randomUUID()),
@@ -34,7 +36,9 @@ const compressions = pgTable('compressions', {
   strategy: text('strategy').notNull(),
   tokensSaved: integer('tokens_saved').notNull().default(0),
   createdAt: timestamp('created_at').defaultNow().notNull(),
-});
+}, (table) => [
+  index('compressions_user_created_idx').on(table.userId, table.createdAt),
+]);
 
 const subscriptions = pgTable('subscriptions', {
   id: text('id').primaryKey().$defaultFn(() => crypto.randomUUID()),

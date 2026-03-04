@@ -53,20 +53,26 @@ export function compress(text, options = {}) {
     .filter(([key]) => key.includes(' '))
     .sort((a, b) => b[0].length - a[0].length);
 
-  for (const [phrase, abbr] of phraseEntries) {
-    // Skip entries that save zero or negative tokens
-    if (ZERO_SAVINGS.has(phrase) || NEGATIVE_SAVINGS.has(phrase)) continue;
+  // Pre-compile phrase regexes once, outside the loop
+  const compiledPhrases = phraseEntries
+    .filter(([phrase, abbr]) => {
+      if (ZERO_SAVINGS.has(phrase) || NEGATIVE_SAVINGS.has(phrase)) return false;
+      const savings = replacementTokenSavings(phrase, abbr, tokenizer);
+      return savings > 0;
+    })
+    .map(([phrase, abbr]) => ({
+      phrase,
+      abbr,
+      regex: new RegExp(`\\b${escapeRegex(phrase)}\\b`, 'gi'),
+    }));
 
-    // Verify this replacement actually saves tokens
-    const savings = replacementTokenSavings(phrase, abbr, tokenizer);
-    if (savings <= 0) continue;
-
-    const regex = new RegExp(`\\b${escapeRegex(phrase)}\\b`, 'gi');
-    const matches = compressed.match(regex);
-    if (matches && matches.length > 0) {
-      compressed = compressed.replace(regex, abbr);
+  for (const { phrase, abbr, regex } of compiledPhrases) {
+    let matchCount = 0;
+    const next = compressed.replace(regex, (m) => { matchCount++; return abbr; });
+    if (matchCount > 0) {
+      compressed = next;
       const key = `${phrase}|||${abbr}`;
-      replacementCounts.set(key, (replacementCounts.get(key) || 0) + matches.length);
+      replacementCounts.set(key, (replacementCounts.get(key) || 0) + matchCount);
     }
   }
 
@@ -75,22 +81,27 @@ export function compress(text, options = {}) {
     .filter(([key]) => !key.includes(' '))
     .sort((a, b) => b[0].length - a[0].length);
 
-  for (const [word, abbr] of wordEntries) {
-    if (word === abbr) continue; // skip identity mappings
+  // Pre-compile word regexes once, outside the loop
+  const compiledWords = wordEntries
+    .filter(([word, abbr]) => {
+      if (word === abbr) return false;
+      if (ZERO_SAVINGS.has(word) || NEGATIVE_SAVINGS.has(word)) return false;
+      const savings = replacementTokenSavings(word, abbr, tokenizer);
+      return savings > 0;
+    })
+    .map(([word, abbr]) => ({
+      word,
+      abbr,
+      regex: new RegExp(`\\b${escapeRegex(word)}\\b`, 'gi'),
+    }));
 
-    // Skip entries that save zero or negative tokens
-    if (ZERO_SAVINGS.has(word) || NEGATIVE_SAVINGS.has(word)) continue;
-
-    // Verify this replacement actually saves tokens
-    const savings = replacementTokenSavings(word, abbr, tokenizer);
-    if (savings <= 0) continue;
-
-    const regex = new RegExp(`\\b${escapeRegex(word)}\\b`, 'gi');
-    const matches = compressed.match(regex);
-    if (matches && matches.length > 0) {
-      compressed = compressed.replace(regex, abbr);
+  for (const { word, abbr, regex } of compiledWords) {
+    let matchCount = 0;
+    const next = compressed.replace(regex, (m) => { matchCount++; return abbr; });
+    if (matchCount > 0) {
+      compressed = next;
       const key = `${word}|||${abbr}`;
-      replacementCounts.set(key, (replacementCounts.get(key) || 0) + matches.length);
+      replacementCounts.set(key, (replacementCounts.get(key) || 0) + matchCount);
     }
   }
 

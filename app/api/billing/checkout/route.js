@@ -3,9 +3,7 @@ import { auth } from '@/app/lib/auth';
 import { db } from '@/app/lib/db';
 import { users } from '@/schema/schema';
 import { eq } from 'drizzle-orm';
-import Stripe from 'stripe';
-
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+import { getStripe } from '@/app/lib/stripe';
 
 const PRICE_MAP = {
   pro: process.env.STRIPE_PRO_PRICE_ID,
@@ -38,7 +36,7 @@ export async function POST(request) {
 
   // Create Stripe customer if needed
   if (!customerId) {
-    const customer = await stripe.customers.create({
+    const customer = await getStripe().customers.create({
       email: session.user.email,
       name: session.user.name,
       metadata: { userId: session.user.id },
@@ -51,7 +49,7 @@ export async function POST(request) {
       .where(eq(users.id, session.user.id));
   }
 
-  const checkoutSession = await stripe.checkout.sessions.create({
+  const checkoutSession = await getStripe().checkout.sessions.create({
     customer: customerId,
     mode: 'subscription',
     line_items: [{ price: priceId, quantity: 1 }],
