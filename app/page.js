@@ -11,15 +11,26 @@ export default function Home() {
       <main className="pt-14">
         {/* Hero — the demo IS the product */}
         <section className="px-6 pt-20 pb-16 relative">
+          {/* Data stream animation */}
+          <div aria-hidden="true" className="absolute inset-0 overflow-hidden pointer-events-none">
+            <div className="data-stream-line" />
+            <div className="data-stream-line" />
+            <div className="data-stream-line" />
+          </div>
+
           <div className="absolute top-[-60px] left-1/2 -translate-x-1/2 w-[500px] h-[300px] bg-savings/5 rounded-full blur-[100px] pointer-events-none" />
 
           <div className="max-w-4xl mx-auto text-center mb-12 relative">
+            <p className="text-xs tracking-[0.25em] uppercase text-savings/60 mb-4 font-mono">
+              ◈ Token Compression Engine — Free Forever
+            </p>
             <div className="flex justify-center mb-6">
               <Shrinkray size={100} className="animate-bounce-slow" />
             </div>
             <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight text-text leading-tight">
-              Same AI, fewer tokens.
-              <span className="text-savings"> Ship smarter.</span>
+              <span className="terminal-prompt" />Same AI, fewer tokens.
+              <br />
+              <span className="text-savings">Ship smarter.<span className="cursor-blink ml-0.5 inline-block w-0.5 h-[0.9em] bg-savings align-middle" /></span>
             </h1>
             <p className="mt-4 text-lg text-text-secondary max-w-2xl mx-auto">
               Your prompts are verbose. Your models don&apos;t need them to be.
@@ -70,15 +81,16 @@ export default function Home() {
         {/* Social proof / stats */}
         <section className="px-6 py-16 border-t border-border bg-bg-secondary">
           <div className="max-w-4xl mx-auto">
-            <div className="grid grid-cols-3 gap-8 text-center">
+            <div className="grid grid-cols-3 gap-4">
               {[
-                { value: '100%', label: 'Free forever' },
-                { value: '< 200ms', label: 'Processing time' },
-                { value: 'All LLMs', label: 'Compatible' },
-              ].map(({ value, label }) => (
-                <div key={label}>
-                  <div className="text-3xl font-bold text-savings">{value}</div>
-                  <div className="text-sm text-text-muted mt-1">{label}</div>
+                { value: '100%', label: 'Free forever', icon: '◈' },
+                { value: '< 200ms', label: 'Processing time', icon: '◎' },
+                { value: 'All LLMs', label: 'Compatible', icon: '✦' },
+              ].map(({ value, label, icon }) => (
+                <div key={label} className="savings-glow border border-savings/15 rounded-xl p-5 text-center bg-bg-card">
+                  <div className="text-savings/40 text-lg mb-2 font-mono">{icon}</div>
+                  <div className="text-2xl font-bold text-savings font-mono">{value}</div>
+                  <div className="text-xs text-text-muted mt-1">{label}</div>
                 </div>
               ))}
             </div>
@@ -132,11 +144,15 @@ const res = await openai.chat.completions.create({
         {/* CTA */}
         <section className="px-6 py-20 border-t border-border bg-bg-secondary text-center">
           <h2 className="text-3xl font-bold text-text mb-4">
-            Compress your prompts for free
+            <span className="terminal-prompt" />Compress your<br />
+            <span className="text-savings">prompts for free</span>
           </h2>
           <p className="text-text-secondary mb-8">
             No credit card. No limits. No catch. Free forever.
           </p>
+          <div className="font-mono text-xs text-text-muted/60 mb-6 mt-2">
+            $ npm install tokenshrink <span className="text-savings/50">—</span> save tokens instantly
+          </div>
           <Link
             href="/login"
             className="inline-block px-8 py-3 bg-savings text-bg font-semibold rounded-lg hover:bg-savings/90 transition-all text-sm"

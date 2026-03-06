@@ -1,11 +1,13 @@
-import { Geist, Geist_Mono } from 'next/font/google';
+import { Space_Mono, Geist_Mono } from 'next/font/google';
 import './globals.css';
 import Providers from './components/Providers';
 import { Analytics } from '@vercel/analytics/next';
 
-const geistSans = Geist({
-  variable: '--font-geist-sans',
+const spaceMono = Space_Mono({
+  variable: '--font-space-mono',
   subsets: ['latin'],
+  display: 'swap',
+  weight: ['400', '700'],
 });
 
 const geistMono = Geist_Mono({
@@ -36,7 +38,7 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en" className={`${geistSans.variable} ${geistMono.variable}`}>
+    <html lang="en" className={`${spaceMono.variable} ${geistMono.variable}`}>
       <body className="min-h-screen">
         <Providers>{children}</Providers>
         <Analytics />

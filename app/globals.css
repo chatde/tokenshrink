@@ -1,19 +1,19 @@
 @import "tailwindcss";
 
 @theme {
-  --color-bg: #0a0a0a;
+  --color-bg: #050505;
   --color-bg-secondary: #141414;
   --color-bg-card: #1a1a1a;
   --color-border: #262626;
   --color-border-hover: #404040;
-  --color-savings: #10b981;
+  --color-savings: #00d17d;
   --color-savings-dim: #065f46;
   --color-cost: #ef4444;
   --color-cost-dim: #7f1d1d;
   --color-text: #fafafa;
   --color-text-secondary: #a1a1aa;
   --color-text-muted: #71717a;
-  --font-sans: var(--font-geist-sans), system-ui, -apple-system, sans-serif;
+  --font-sans: var(--font-space-mono), 'Courier New', monospace;
   --font-mono: var(--font-geist-mono), 'Fira Code', monospace;
 }
 
@@ -89,4 +89,50 @@ body {
 
 ::-webkit-scrollbar-thumb:hover {
   background: var(--color-border-hover);
+}
+
+/* Terminal cursor blink */
+@keyframes cursor-blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+.cursor-blink {
+  animation: cursor-blink 1s step-end infinite;
+}
+
+/* Data stream - horizontal lines moving */
+@keyframes data-stream {
+  0% { transform: translateX(-100%); opacity: 0; }
+  10% { opacity: 1; }
+  90% { opacity: 1; }
+  100% { transform: translateX(100vw); opacity: 0; }
+}
+
+.data-stream-line {
+  position: absolute;
+  height: 1px;
+  width: 200px;
+  background: linear-gradient(90deg, transparent, #00d17d, transparent);
+  pointer-events: none;
+}
+.data-stream-line:nth-child(1) { top: 20%; animation: data-stream 6s linear 0s infinite; }
+.data-stream-line:nth-child(2) { top: 45%; animation: data-stream 8s linear 2s infinite; }
+.data-stream-line:nth-child(3) { top: 70%; animation: data-stream 5s linear 4s infinite; }
+
+/* Terminal prompt style */
+.terminal-prompt::before {
+  content: '> ';
+  color: #00d17d;
+  opacity: 0.7;
+}
+
+/* Compression bar animation */
+@keyframes compress-bar {
+  0% { width: 100%; }
+  100% { width: 15%; }
+}
+
+/* Glowing border */
+.savings-glow {
+  box-shadow: 0 0 20px rgba(0, 209, 125, 0.15), inset 0 0 20px rgba(0, 209, 125, 0.05);
 }
