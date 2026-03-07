@@ -40,6 +40,21 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en" className={`${spaceMono.variable} ${geistMono.variable}`}>
       <body className="min-h-screen">
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "SoftwareApplication",
+              "name": "TokenShrink",
+              "url": "https://tokenshrink.com",
+              "applicationCategory": "DeveloperApplication",
+              "description": "Compress AI prompts — same results, fewer tokens. Free forever.",
+              "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+              "operatingSystem": "Web"
+            })
+          }}
+        />
         <Providers>{children}</Providers>
         <Analytics />
       </body>
