@@ -35,7 +35,7 @@
     if (typeof compressFn !== 'function') process.exit(0);
 
     let result;
-    try { result = compressFn(prompt); } catch { process.exit(0); }
+    try { result = compressFn(prompt, { source: 'claude-code' }); } catch { process.exit(0); }
 
     const saved = result?.stats?.tokensSaved ?? 0;
     if (saved <= 0) process.exit(0);

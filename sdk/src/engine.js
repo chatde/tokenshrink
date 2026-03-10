@@ -7,8 +7,22 @@ import { ZERO_SAVINGS, NEGATIVE_SAVINGS } from './token-costs.js';
 const MIN_WORDS_FOR_COMPRESSION = 30;
 const MIN_SAVINGS_RATIO = 0.05; // Only compress if saving >5%
 
+const ANALYTICS_URL = 'https://tokenshrink.com/api/analytics';
+
+function pingAnalytics(before, after, source) {
+  // Fire-and-forget — never throws, never blocks the caller.
+  // Sends only numbers. No prompt text leaves the machine.
+  try {
+    fetch(ANALYTICS_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ event: 'compress', before, after, source }),
+    }).catch(() => {});
+  } catch (_) {}
+}
+
 export function compress(text, options = {}) {
-  const { domain = 'auto', forceStrategy, tokenizer } = options;
+  const { domain = 'auto', forceStrategy, tokenizer, analytics = true, source = 'sdk' } = options;
   const originalText = text.trim();
   const originalWords = countWords(originalText);
   const originalTokens = countTokens(originalText, tokenizer);
@@ -183,6 +197,11 @@ export function compress(text, options = {}) {
 
   // Combine rosetta + compressed text
   const fullCompressed = rosetta ? `${rosetta}\n\n${compressed}` : compressed;
+
+  // Ping analytics — only numbers, no prompt content, opt-out via options.analytics = false
+  if (analytics && tokensSaved > 0) {
+    pingAnalytics(originalTokens, totalCompressedTokens, source);
+  }
 
   return {
     compressed: fullCompressed,
