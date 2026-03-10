@@ -43,6 +43,26 @@ export default function Home() {
           <CompressorWidget />
         </section>
 
+        {/* Social proof / stats */}
+        <section className="px-6 py-16 border-t border-border bg-bg-secondary">
+          <div className="max-w-4xl mx-auto">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <TokenCounter />
+              {[
+                { value: '100%', label: 'Free forever', icon: '◈' },
+                { value: '< 200ms', label: 'Processing time', icon: '◎' },
+                { value: 'All LLMs', label: 'Compatible', icon: '✦' },
+              ].map(({ value, label, icon }) => (
+                <div key={label} className="savings-glow border border-savings/15 rounded-xl p-5 text-center bg-bg-card">
+                  <div className="text-savings/40 text-lg mb-2 font-mono">{icon}</div>
+                  <div className="text-2xl font-bold text-savings font-mono">{value}</div>
+                  <div className="text-xs text-text-muted mt-1">{label}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
         {/* How it works */}
         <section className="px-6 py-20 border-t border-border">
           <div className="max-w-4xl mx-auto">
@@ -73,26 +93,6 @@ export default function Home() {
                   <div className="text-3xl font-bold text-savings/20 mb-3 font-mono">{step}</div>
                   <h3 className="text-base font-semibold text-text mb-2">{title}</h3>
                   <p className="text-sm text-text-secondary">{desc}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* Social proof / stats */}
-        <section className="px-6 py-16 border-t border-border bg-bg-secondary">
-          <div className="max-w-4xl mx-auto">
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <TokenCounter />
-              {[
-                { value: '100%', label: 'Free forever', icon: '◈' },
-                { value: '< 200ms', label: 'Processing time', icon: '◎' },
-                { value: 'All LLMs', label: 'Compatible', icon: '✦' },
-              ].map(({ value, label, icon }) => (
-                <div key={label} className="savings-glow border border-savings/15 rounded-xl p-5 text-center bg-bg-card">
-                  <div className="text-savings/40 text-lg mb-2 font-mono">{icon}</div>
-                  <div className="text-2xl font-bold text-savings font-mono">{value}</div>
-                  <div className="text-xs text-text-muted mt-1">{label}</div>
                 </div>
               ))}
             </div>
