@@ -1,6 +1,7 @@
 import Navbar from './components/Navbar';
 import CompressorWidget from './components/CompressorWidget';
 import Shrinkray from './components/Shrinkray';
+import TokenCounter from './components/TokenCounter';
 import Link from 'next/link';
 
 export default function Home() {
@@ -81,7 +82,8 @@ export default function Home() {
         {/* Social proof / stats */}
         <section className="px-6 py-16 border-t border-border bg-bg-secondary">
           <div className="max-w-4xl mx-auto">
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <TokenCounter />
               {[
                 { value: '100%', label: 'Free forever', icon: '◈' },
                 { value: '< 200ms', label: 'Processing time', icon: '◎' },
@@ -174,6 +176,7 @@ const res = await openai.chat.completions.create({
             <div className="flex items-center gap-5 text-xs text-text-muted">
               <Link href="/docs" className="hover:text-text transition-colors">Docs</Link>
               <Link href="/providers" className="hover:text-text transition-colors">Providers</Link>
+              <Link href="/integrations" className="hover:text-text transition-colors">Integrations</Link>
               <Link href="/terms" className="hover:text-text transition-colors">Terms</Link>
               <Link href="/privacy" className="hover:text-text transition-colors">Privacy</Link>
               <a href="https://apiguardrails.com" target="_blank" rel="noopener noreferrer" className="hover:text-text transition-colors">API Guardrails</a>

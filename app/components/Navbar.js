@@ -23,6 +23,12 @@ export default function Navbar() {
             Providers
           </Link>
           <Link
+            href="/integrations"
+            className="text-sm text-text-secondary hover:text-text transition-colors"
+          >
+            Integrations
+          </Link>
+          <Link
             href="/docs"
             className="text-sm text-text-secondary hover:text-text transition-colors"
           >

@@ -19,13 +19,16 @@
     const prompt = input.prompt;
     if (!prompt || typeof prompt !== 'string' || !prompt.trim()) process.exit(0);
 
-    // Detect missing package without throwing into the outer catch
-    try { require.resolve('tokenshrink'); } catch { process.exit(0); }
+    // Detect missing package and get absolute path via CJS resolution
+    let resolvedPath;
+    try { resolvedPath = require.resolve('tokenshrink'); } catch { process.exit(0); }
 
-    // tokenshrink is ESM-only ("type": "module") — must use dynamic import
+    // tokenshrink is ESM-only — use pathToFileURL so dynamic import works
+    // regardless of NODE_PATH (ESM ignores NODE_PATH, but file:// URLs always work)
     let compressFn;
     try {
-      const mod = await import('tokenshrink');
+      const { pathToFileURL } = require('url');
+      const mod = await import(pathToFileURL(resolvedPath).href);
       compressFn = mod.compress ?? mod.default?.compress;
     } catch { process.exit(0); }
 
