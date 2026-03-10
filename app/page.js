@@ -23,7 +23,7 @@ export default function Home() {
 
           <div className="max-w-4xl mx-auto text-center mb-12 relative">
             <p className="text-xs tracking-[0.25em] uppercase text-savings/60 mb-4 font-mono">
-              ◈ Token Compression Engine — Free Forever
+              ◈ Token Compression Engine
             </p>
             <div className="flex justify-center mb-6">
               <Shrinkray size={100} className="animate-bounce-slow" />
