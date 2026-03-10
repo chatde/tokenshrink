@@ -3,7 +3,7 @@
 import AnimatedCount from './AnimatedCount';
 
 export default async function TokenCounter() {
-  let tokensSaved = 1_500_000; // fallback baseline
+  let tokensSaved = 1_200_000; // fallback if npm API fails (~240 downloads × 5000)
 
   try {
     const res = await fetch(
@@ -13,7 +13,7 @@ export default async function TokenCounter() {
     if (res.ok) {
       const data = await res.json();
       const downloads = data.downloads ?? 0;
-      tokensSaved = Math.max(downloads * 5000, 1_500_000);
+      tokensSaved = downloads * 5000;
     }
   } catch {
     // fetch failed — use baseline
