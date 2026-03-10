@@ -49,7 +49,7 @@ export default function Image() {
             marginTop: 16,
           }}
         >
-          Same AI, fewer tokens. Free forever.
+          Same AI, fewer tokens. Open source.
         </div>
 
         <div

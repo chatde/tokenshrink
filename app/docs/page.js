@@ -167,7 +167,7 @@ const res = await openai.chat.completions.create({
                 </div>
                 <div className="flex justify-between">
                   <span>Price</span>
-                  <span className="text-savings font-medium">Free forever</span>
+                  <span className="text-savings font-medium">Free</span>
                 </div>
               </div>
             </div>

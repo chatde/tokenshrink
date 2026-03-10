@@ -36,7 +36,7 @@ export default function Home() {
             <p className="mt-4 text-lg text-text-secondary max-w-2xl mx-auto">
               Your prompts are verbose. Your models don&apos;t need them to be.
               <br />
-              TokenShrink compresses prompts — same results, fewer tokens. Free forever.
+              TokenShrink compresses prompts — same results, fewer tokens. Open source.
             </p>
           </div>
 
@@ -49,7 +49,7 @@ export default function Home() {
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <TokenCounter />
               {[
-                { value: '100%', label: 'Free forever', icon: '◈' },
+                { value: '100%', label: 'Open source', icon: '◈' },
                 { value: '< 200ms', label: 'Processing time', icon: '◎' },
                 { value: 'All LLMs', label: 'Compatible', icon: '✦' },
               ].map(({ value, label, icon }) => (
@@ -150,7 +150,7 @@ const res = await openai.chat.completions.create({
             <span className="text-savings">prompts for free</span>
           </h2>
           <p className="text-text-secondary mb-8">
-            No credit card. No limits. No catch. Free forever.
+            No account required. Open source. Compress and ship.
           </p>
           <div className="font-mono text-xs text-text-muted/60 mb-6 mt-2">
             $ npm install tokenshrink <span className="text-savings/50">—</span> save tokens instantly
@@ -171,7 +171,7 @@ const res = await openai.chat.completions.create({
               <span className="text-border">&middot;</span>
               <span>&copy; {new Date().getFullYear()}</span>
               <span className="text-border">&middot;</span>
-              <span>Free forever</span>
+              <span>Open source</span>
             </div>
             <div className="flex items-center gap-5 text-xs text-text-muted">
               <Link href="/docs" className="hover:text-text transition-colors">Docs</Link>

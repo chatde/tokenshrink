@@ -3,7 +3,7 @@ import Link from 'next/link';
 
 export const metadata = {
   title: 'Pricing — TokenShrink',
-  description: 'TokenShrink is free forever. No limits, no credit card, no catch.',
+  description: 'TokenShrink is free to use. Open source, no account required.',
 };
 
 export default function PricingPage() {
@@ -13,9 +13,9 @@ export default function PricingPage() {
       <main className="pt-14">
         <section className="px-6 py-20">
           <div className="text-center mb-12">
-            <h1 className="text-3xl font-bold text-text">Free forever</h1>
+            <h1 className="text-3xl font-bold text-text">Simple pricing</h1>
             <p className="text-text-secondary mt-2">
-              No paid plans. No credit card. No limits. Just compress.
+              Free to use. No account required to get started.
             </p>
           </div>
 
@@ -25,7 +25,7 @@ export default function PricingPage() {
               <h3 className="text-lg font-semibold text-text">Free</h3>
               <div className="mt-3 flex items-baseline justify-center gap-1">
                 <span className="text-5xl font-bold text-text">$0</span>
-                <span className="text-sm text-text-muted">forever</span>
+                <span className="text-sm text-text-muted">/ month</span>
               </div>
             </div>
 
@@ -66,7 +66,7 @@ export default function PricingPage() {
               {[
                 {
                   q: 'Is it really free?',
-                  a: 'Yes. No paid plans, no credit card, no hidden fees. TokenShrink is free for everyone.',
+                  a: 'Yes. No credit card required, no hidden fees. Start compressing immediately.',
                 },
                 {
                   q: 'Does compression affect AI response quality?',
@@ -82,7 +82,7 @@ export default function PricingPage() {
                 },
                 {
                   q: 'Why is it free?',
-                  a: 'We believe prompt compression should be accessible to everyone. We may add optional premium features in the future, but the core compressor will always be free.',
+                  a: 'We believe prompt compression should be accessible to everyone. The core compressor is free to use, and we may introduce optional features over time.',
                 },
               ].map(({ q, a }) => (
                 <div key={q} className="bg-bg-card border border-border rounded-lg p-5">
