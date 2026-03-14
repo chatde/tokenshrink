@@ -22,6 +22,25 @@ export const PLANS = {
     maxWordsPerShrink: 100000,
     features: ['Web compressor', 'Unlimited words', 'API access + SDK', 'Usage dashboard'],
   },
+  advanced: {
+    name: 'Advanced',
+    price: 9,
+    priceAnnual: 79,
+    wordsPerMonth: 999999999,
+    maxWordsPerShrink: 100000,
+    stripePriceId: process.env.STRIPE_ADVANCED_PRICE_ID,
+    stripePriceIdAnnual: process.env.STRIPE_ADVANCED_PRICE_ID_ANNUAL,
+    features: [
+      'Everything in Free',
+      'Rosetta Protocol (Enigma codec)',
+      'Session codebook — negotiated cipher per session',
+      'Domain rotors (React / Node / Python / Supabase)',
+      'Sub-agent vocab inheritance',
+      'Cross-session learning — Hall of Fame terms',
+      'Compaction-safe Rosetta re-injection',
+      'Advanced usage dashboard',
+    ],
+  },
 };
 
 export const ANONYMOUS_WORD_LIMIT = 100000;

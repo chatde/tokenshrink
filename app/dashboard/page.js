@@ -4,6 +4,7 @@ import { Suspense } from 'react';
 import { useSession } from 'next-auth/react';
 import { useEffect, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import Navbar from '../components/Navbar';
 
 function DashboardContent() {
@@ -17,6 +18,8 @@ function DashboardContent() {
   const [createdKey, setCreatedKey] = useState(null);
   const [creating, setCreating] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [upgradingPlan, setUpgradingPlan] = useState(false);
+  const [openingPortal, setOpeningPortal] = useState(false);
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -87,6 +90,36 @@ function DashboardContent() {
     setTimeout(() => setCopied(false), 2000);
   };
 
+  const handleUpgrade = async () => {
+    setUpgradingPlan(true);
+    try {
+      const res = await fetch('/api/billing/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ plan: 'advanced' }),
+      });
+      const data = await res.json();
+      if (data.url) window.location.href = data.url;
+    } catch (e) {
+      alert('Something went wrong. Please try again.');
+    } finally {
+      setUpgradingPlan(false);
+    }
+  };
+
+  const handleBillingPortal = async () => {
+    setOpeningPortal(true);
+    try {
+      const res = await fetch('/api/billing/portal', { method: 'POST' });
+      const data = await res.json();
+      if (data.url) window.location.href = data.url;
+    } catch (e) {
+      alert('Something went wrong. Please try again.');
+    } finally {
+      setOpeningPortal(false);
+    }
+  };
+
   if (status === 'loading' || loading) {
     return (
       <div className="max-w-4xl mx-auto py-20 text-center text-text-muted">
@@ -99,18 +132,51 @@ function DashboardContent() {
 
   const wordsUsed = usage?.wordsUsed || 0;
   const compressionCount = usage?.compressionCount || 0;
-  const planName = (session.user.plan || 'free').charAt(0).toUpperCase() + (session.user.plan || 'free').slice(1);
+  const plan = session.user.plan || 'free';
+  const isAdvanced = plan === 'advanced';
+  const planName = plan.charAt(0).toUpperCase() + plan.slice(1);
 
   return (
     <div className="max-w-4xl mx-auto py-12">
       <div className="flex items-center justify-between mb-8">
         <div>
           <h1 className="text-2xl font-bold text-text">Dashboard</h1>
-          <p className="text-sm text-text-muted mt-1">
-            {session.user.name || session.user.email} &middot; {planName} plan
+          <p className="text-sm text-text-muted mt-1 flex items-center gap-2">
+            {session.user.name || session.user.email}
+            <span className={`inline-block text-xs font-medium px-2 py-0.5 rounded-full ${isAdvanced ? 'bg-savings/20 text-savings' : 'bg-border text-text-muted'}`}>
+              {planName}
+            </span>
           </p>
         </div>
+        {isAdvanced ? (
+          <button
+            onClick={handleBillingPortal}
+            disabled={openingPortal}
+            className="text-xs text-text-muted hover:text-text transition-colors disabled:opacity-50"
+          >
+            {openingPortal ? 'Opening…' : 'Manage billing'}
+          </button>
+        ) : null}
       </div>
+
+      {/* Upgrade CTA — free users only */}
+      {!isAdvanced && (
+        <div className="bg-savings/5 border border-savings/30 rounded-xl p-5 mb-8 flex items-center justify-between gap-4">
+          <div>
+            <p className="text-sm font-semibold text-text">Unlock the Enigma Machine</p>
+            <p className="text-xs text-text-secondary mt-0.5">
+              Rosetta Protocol · Domain rotors · Cross-session learning · $9/month
+            </p>
+          </div>
+          <button
+            onClick={handleUpgrade}
+            disabled={upgradingPlan}
+            className="shrink-0 px-4 py-2 text-sm font-medium bg-savings text-bg rounded-lg hover:bg-savings/90 transition-all disabled:opacity-60"
+          >
+            {upgradingPlan ? 'Redirecting…' : 'Upgrade'}
+          </button>
+        </div>
+      )}
 
       {/* Stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">

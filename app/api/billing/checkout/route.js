@@ -8,6 +8,7 @@ import { getStripe } from '@/app/lib/stripe';
 const PRICE_MAP = {
   pro: process.env.STRIPE_PRO_PRICE_ID,
   team: process.env.STRIPE_TEAM_PRICE_ID,
+  advanced: process.env.STRIPE_ADVANCED_PRICE_ID,
 };
 
 export async function POST(request) {
