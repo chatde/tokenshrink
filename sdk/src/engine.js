@@ -3,6 +3,7 @@ import { detectStrategy, findRepeatedPhrases } from './strategies.js';
 import { generateRosetta, countRosettaWords, countRosettaTokens } from './rosetta.js';
 import { countWords, wordsToTokens, tokensToDollars, countTokens, replacementTokenSavings } from './utils.js';
 import { ZERO_SAVINGS, NEGATIVE_SAVINGS } from './token-costs.js';
+import { nlpCompress } from './nlp.js';
 
 const MIN_WORDS_FOR_COMPRESSION = 10;
 const MIN_SAVINGS_RATIO = 0.05; // Only compress if saving >5%
@@ -22,7 +23,7 @@ function pingAnalytics(before, after, source) {
 }
 
 export function compress(text, options = {}) {
-  const { domain = 'auto', forceStrategy, tokenizer, analytics = true, source = 'sdk' } = options;
+  const { domain = 'auto', forceStrategy, tokenizer, analytics = true, source = 'sdk', nlp = true, nlpAggressiveness = 0.4 } = options;
   const originalText = text.trim();
   const originalWords = countWords(originalText);
   const originalTokens = countTokens(originalText, tokenizer);
@@ -126,6 +127,18 @@ export function compress(text, options = {}) {
     usedReplacements.push({ original, replacement, occurrences: count });
   }
 
+  // Phase 2.5: NLP-powered compression (clause dedup, modifier stripping, importance weighting)
+  let nlpStats = null;
+  if (nlp && countWords(compressed) >= 20) {
+    const nlpResult = nlpCompress(compressed, {
+      aggressiveness: nlpAggressiveness,
+      dedup: true,
+      stripModifiers: true,
+    });
+    compressed = nlpResult.compressed;
+    nlpStats = nlpResult.nlpStats;
+  }
+
   // Phase 3: Pattern detection — find repeated phrases and replace with codes
   const patternReplacements = [];
   const repeatedPhrases = findRepeatedPhrases(compressed, 3, 2);
@@ -226,6 +239,7 @@ export function compress(text, options = {}) {
       replacementCount: usedReplacements.length,
       patternCount: patternReplacements.length,
       tokenizerUsed: typeof tokenizer === 'function' ? 'custom' : 'built-in',
+      ...(nlpStats ? { nlp: nlpStats } : {}),
     },
   };
 }

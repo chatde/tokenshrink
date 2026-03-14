@@ -6,3 +6,4 @@ export { TOKEN_COSTS, ZERO_SAVINGS, NEGATIVE_SAVINGS } from './token-costs.js';
 export { compressHistory } from './history.js';
 export { loadProjectCodebook, recordSessionFires, getHallOfFame, getProjectVocab, pruneDeadWeight, processFireLog } from './codebook-store.js';
 export { getDomainVocab, DOMAIN_REGISTRY } from './domains/index.js';
+export { nlpCompress, findCollocations, deduplicateClauses, stripRedundantModifiers, computeImportance, compressSentence, buildVocab, npmiScore, porterStem, PROMPT_SAFE_STOPWORDS } from './nlp.js';
