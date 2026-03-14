@@ -17,8 +17,8 @@ describe('compress API route logic', () => {
       expect(result.compressed).toBe('');
     });
 
-    it('handles text under 30 words', () => {
-      const text = 'This is a short test with only ten words here.';
+    it('handles text under 10 words', () => {
+      const text = 'Short text.';
       const result = compress(text);
 
       expect(result.stats.tooShort).toBe(true);
