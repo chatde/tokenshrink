@@ -9,6 +9,7 @@ import { countTokens, replacementTokenSavings } from './utils.js';
 const MIN_FREQUENCY = 2;          // Term must appear at least this many times
 const MAX_ENTRIES = 20;           // Max codebook entries (keeps Rosetta small)
 const MIN_TOKEN_SAVINGS = 1;      // Abbreviation must save at least 1 token
+const MIN_TERM_LENGTH = 8;        // Term must be at least this many chars (skip short words)
 
 // Terms to never abbreviate
 const SKIP_TERMS = new Set([
@@ -16,14 +17,26 @@ const SKIP_TERMS = new Set([
   'the', 'and', 'for', 'with', 'that', 'this', 'from', 'are', 'have',
   'you', 'your', 'not', 'can', 'will', 'but', 'use', 'all', 'when',
   'then', 'than', 'they', 'them', 'been', 'was', 'were', 'has', 'had',
+  'never', 'always', 'every', 'only', 'also', 'just', 'more', 'most',
+  'each', 'any', 'some', 'other', 'both', 'full', 'new', 'current',
   // Status/action words (frequent in logs but not vocabulary)
   'running', 'fixed', 'done', 'pass', 'fail', 'warn', 'skip', 'error',
   'added', 'updated', 'removed', 'created', 'started', 'stopped',
   'completed', 'pending', 'active', 'enabled', 'disabled',
+  'remaining', 'returned', 'working', 'reading', 'writing', 'loading',
+  'sessions', 'session', 'handoff', 'startup', 'shutdown',
+  // Common doc/markdown words
+  'before', 'after', 'should', 'must', 'make', 'file', 'files',
+  'code', 'data', 'time', 'note', 'read', 'write', 'check', 'step',
+  'steps', 'section', 'content', 'message', 'messages', 'output',
+  'input', 'value', 'values', 'field', 'fields', 'type', 'types',
   // Already-short tech terms
   'node', 'npm', 'git', 'api', 'url', 'http', 'json', 'sql', 'css',
   'app', 'src', 'dev', 'prod', 'true', 'false', 'null', 'void',
   'claude', 'phone', 'dashboard', 'discord', 'vercel', 'watson',
+  // Hook/system words that appear in CLAUDE.md context
+  'compact', 'context', 'system', 'global', 'local', 'config',
+  'prompt', 'token', 'tokens', 'pattern', 'patterns', 'prefix',
 ]);
 
 /**
@@ -101,7 +114,11 @@ function generateAbbreviation(term, usedAbbrs) {
  * Returns an array of { term, abbr, tokensSaved, frequency } sorted by impact.
  */
 export function generateCodebook(text, options = {}) {
-  const { maxEntries = MAX_ENTRIES, minFrequency = MIN_FREQUENCY } = options;
+  const {
+    maxEntries = MAX_ENTRIES,
+    minFrequency = MIN_FREQUENCY,
+    minLength = MIN_TERM_LENGTH,
+  } = options;
 
   const freq = extractCandidates(text);
   const usedAbbrs = new Set();
@@ -110,6 +127,7 @@ export function generateCodebook(text, options = {}) {
   // Score each candidate: tokensSaved × frequency (amortized session value)
   for (const [term, frequency] of freq) {
     if (frequency < minFrequency) continue;
+    if (term.length < minLength) continue;
 
     const abbr = generateAbbreviation(term, usedAbbrs);
     if (!abbr) continue; // no clean abbreviation possible
