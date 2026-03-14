@@ -178,6 +178,24 @@ export const PHRASES = {
   'provided that': 'if',
   'assuming that': 'if',
   'given that': 'since',
+
+  // Claude Code / conversational patterns — filler removal
+  // Ordered longest-match first (engine sorts phrases by length)
+  'I would like you to': '',     // 5t → 0t
+  'I would like to': '',         // 4t → 0t
+  'I need you to': '',           // 4t → 0t
+  'I want you to': '',           // 4t → 0t
+  'can you please': '',          // 3t → 0t
+  'could you please': '',        // 3t → 0t
+  'go ahead and': '',            // 3t → 0t
+  'feel free to': '',            // 3t → 0t
+  'take a look at': 'check',     // 4t → 1t
+  'have a look at': 'check',     // 4t → 1t
+  'can you': '',                 // 2t → 0t
+  'could you': '',               // 2t → 0t
+  'let me know': 'tell me',      // 3t → 2t
+  'do you know': '',             // 3t → 0t
+  'please help me': '',          // 3t → 0t
 };
 
 export const CODE_DOMAIN = {

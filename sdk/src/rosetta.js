@@ -3,8 +3,9 @@ import { UNIVERSAL_ABBREVIATIONS } from './dictionaries.js';
 import { countTokens } from './utils.js';
 
 export function generateRosetta(replacements, patternReplacements = [], tokenizer) {
-  // Filter out universal abbreviations — LLMs already understand these
+  // Filter out universal abbreviations and empty replacements (deletions need no decoder)
   const filtered = replacements.filter(({ replacement }) => {
+    if (replacement === '' || replacement == null) return false;
     return !UNIVERSAL_ABBREVIATIONS.has(replacement);
   });
 
