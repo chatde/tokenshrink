@@ -524,7 +524,13 @@ export function compressSentence(sentence, importanceScores, aggressiveness = 0.
  * @returns {{ compressed: string, nlpStats: object }}
  */
 export function nlpCompress(text, options = {}) {
-  if (!text || !text.trim()) return { compressed: text || '', nlpStats: { clausesRemoved: 0, modifiersStripped: 0, collocationsFound: 0 }, collocations: [] };
+  if (!text || !text.trim()) {
+    return {
+      compressed: text || '',
+      nlpStats: { clausesRemoved: 0, modifiersStripped: 0, collocationsFound: 0 },
+      collocations: [],
+    };
+  }
   const {
     aggressiveness = 0.4,
     dedup = true,
