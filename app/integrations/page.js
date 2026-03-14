@@ -1,10 +1,47 @@
+'use client';
+
+import { useState } from 'react';
 import Navbar from '../components/Navbar';
 
-export const metadata = {
-  title: 'Integrations — TokenShrink',
-  description:
-    'Use TokenShrink with Claude Code hooks, OpenClaw, and any LLM SDK. Automatic prompt compression wherever you work.',
-};
+const INSTALL_CMD = 'curl -fsSL https://tokenshrink.com/install-claude-code.sh | bash';
+
+function InstallButton() {
+  const [copied, setCopied] = useState(false);
+
+  function handleCopy() {
+    navigator.clipboard.writeText(INSTALL_CMD).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
+  }
+
+  return (
+    <div className="bg-bg-card border border-savings/30 rounded-xl p-5 savings-glow">
+      <p className="text-xs font-medium text-savings uppercase tracking-wider mb-3">
+        One-command install
+      </p>
+      <div className="flex items-center gap-3">
+        <code className="flex-1 text-sm font-mono text-text bg-bg px-4 py-2.5 rounded-lg border border-border truncate">
+          {INSTALL_CMD}
+        </code>
+        <button
+          onClick={handleCopy}
+          className="shrink-0 px-4 py-2.5 rounded-lg text-sm font-semibold transition-all"
+          style={{
+            background: copied ? 'rgba(34,197,94,0.15)' : 'rgba(34,197,94,0.1)',
+            color: copied ? '#22c55e' : '#4ade80',
+            border: '1px solid rgba(34,197,94,0.3)',
+          }}
+        >
+          {copied ? '✓ Copied' : 'Copy'}
+        </button>
+      </div>
+      <p className="text-xs text-text-muted mt-2">
+        Requires Node.js · Works on macOS and Linux · No npm install needed
+      </p>
+    </div>
+  );
+}
 
 function SectionDivider() {
   return <div className="h-px bg-border" />;
@@ -98,60 +135,62 @@ export default function IntegrationsPage() {
               </p>
             </div>
 
-            <div className="space-y-6 mb-6">
-              <div className="flex gap-4 items-start">
-                <div className="text-2xl font-bold text-savings/20 font-mono leading-none pt-0.5 w-8 shrink-0">01</div>
-                <div className="flex-1">
-                  <p className="text-sm text-text-secondary mb-2">Install the package globally</p>
-                  <CodeWindow filename="terminal">{`npm install -g tokenshrink`}</CodeWindow>
-                </div>
-              </div>
+            <div className="mb-6">
+              <InstallButton />
+            </div>
 
-              <div className="flex gap-4 items-start">
-                <div className="text-2xl font-bold text-savings/20 font-mono leading-none pt-0.5 w-8 shrink-0">02</div>
-                <div className="flex-1">
-                  <p className="text-sm text-text-secondary mb-2">
-                    Copy the hook to <InlineCode>~/.claude/hooks/</InlineCode>
-                  </p>
-                  <CodeWindow filename="terminal">{`curl -o ~/.claude/hooks/tokenshrink-compress.js \\
-  https://raw.githubusercontent.com/chatde/tokenshrink/main/hooks/tokenshrink-compress.js`}</CodeWindow>
-                </div>
-              </div>
+            <div className="bg-bg-card border border-border rounded-xl p-5 mb-6">
+              <h4 className="text-xs font-medium text-savings mb-2 uppercase tracking-wider">
+                What you get
+              </h4>
+              <ul className="text-sm text-text-secondary space-y-1.5">
+                <li>💰 Token savings counter in your Claude Code status bar</li>
+                <li>⚡ Every prompt automatically compressed before it reaches Claude</li>
+                <li>📋 Per-session log at <InlineCode>~/.claude/.tokenshrink-log.jsonl</InlineCode></li>
+              </ul>
+            </div>
 
-              <div className="flex gap-4 items-start">
-                <div className="text-2xl font-bold text-savings/20 font-mono leading-none pt-0.5 w-8 shrink-0">03</div>
-                <div className="flex-1">
-                  <p className="text-sm text-text-secondary mb-2">
-                    Register the hook in <InlineCode>~/.claude/settings.json</InlineCode>
-                  </p>
-                  <CodeWindow filename="~/.claude/settings.json">{`{
+            <details className="group">
+              <summary className="text-xs text-text-muted cursor-pointer hover:text-text-secondary transition-colors list-none flex items-center gap-1.5">
+                <span className="group-open:rotate-90 transition-transform inline-block">▶</span>
+                Manual install steps
+              </summary>
+              <div className="mt-4 space-y-6">
+                <div className="flex gap-4 items-start">
+                  <div className="text-2xl font-bold text-savings/20 font-mono leading-none pt-0.5 w-8 shrink-0">01</div>
+                  <div className="flex-1">
+                    <p className="text-sm text-text-secondary mb-2">
+                      Download the hook to <InlineCode>~/.claude/hooks/</InlineCode>
+                    </p>
+                    <CodeWindow filename="terminal">{`curl -fsSL https://tokenshrink.com/hooks/tokenshrink-compress.js \\
+  -o ~/.claude/hooks/tokenshrink-compress.js`}</CodeWindow>
+                  </div>
+                </div>
+
+                <div className="flex gap-4 items-start">
+                  <div className="text-2xl font-bold text-savings/20 font-mono leading-none pt-0.5 w-8 shrink-0">02</div>
+                  <div className="flex-1">
+                    <p className="text-sm text-text-secondary mb-2">
+                      Register it in <InlineCode>~/.claude/settings.json</InlineCode>
+                    </p>
+                    <CodeWindow filename="~/.claude/settings.json">{`{
   "hooks": {
     "UserPromptSubmit": [
       {
         "hooks": [
           {
             "type": "command",
-            "command": "NODE_PATH=$(npm root -g) node ~/.claude/hooks/tokenshrink-compress.js"
+            "command": "node $HOME/.claude/hooks/tokenshrink-compress.js"
           }
         ]
       }
     ]
   }
 }`}</CodeWindow>
+                  </div>
                 </div>
               </div>
-            </div>
-
-            <div className="bg-bg-card border border-border rounded-xl p-5 savings-glow">
-              <h4 className="text-xs font-medium text-savings mb-2 uppercase tracking-wider">
-                What you get
-              </h4>
-              <p className="text-sm text-text-secondary">
-                Every prompt you type in Claude Code is automatically compressed.
-                Long verbose messages shrink. Your Claude session costs less.
-                Nothing changes about how you work.
-              </p>
-            </div>
+            </details>
           </section>
 
           <SectionDivider />
