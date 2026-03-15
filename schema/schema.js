@@ -35,6 +35,8 @@ const compressions = pgTable('compressions', {
   ratio: real('ratio').notNull(),
   strategy: text('strategy').notNull(),
   tokensSaved: integer('tokens_saved').notNull().default(0),
+  originalTokens: integer('original_tokens').notNull().default(0),
+  compressedTokens: integer('compressed_tokens').notNull().default(0),
   createdAt: timestamp('created_at').defaultNow().notNull(),
 }, (table) => [
   index('compressions_user_created_idx').on(table.userId, table.createdAt),

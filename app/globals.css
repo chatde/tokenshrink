@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "lenis/dist/lenis.css";
 
 @theme {
   --color-bg: #050505;
@@ -135,4 +136,26 @@ body {
 /* Glowing border */
 .savings-glow {
   box-shadow: 0 0 20px rgba(0, 209, 125, 0.15), inset 0 0 20px rgba(0, 209, 125, 0.05);
+}
+
+/* Selection color — savings green */
+::selection {
+  background: rgba(0, 209, 125, 0.2);
+  color: inherit;
+}
+
+::-moz-selection {
+  background: rgba(0, 209, 125, 0.2);
+  color: inherit;
+}
+
+/* View Transitions API */
+@view-transition {
+  navigation: auto;
+}
+
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 0.3s;
+  animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
 }

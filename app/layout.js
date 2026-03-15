@@ -1,6 +1,7 @@
 import { Space_Mono, Geist_Mono } from 'next/font/google';
 import './globals.css';
 import Providers from './components/Providers';
+import SmoothScroll from '@/components/smooth-scroll';
 import { Analytics } from '@vercel/analytics/next';
 
 const spaceMono = Space_Mono({
@@ -55,7 +56,7 @@ export default function RootLayout({ children }) {
             })
           }}
         />
-        <Providers>{children}</Providers>
+        <Providers><SmoothScroll>{children}</SmoothScroll></Providers>
         <Analytics />
       </body>
     </html>

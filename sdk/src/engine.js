@@ -4,7 +4,7 @@ import { generateRosetta, countRosettaWords, countRosettaTokens } from './rosett
 import { countWords, wordsToTokens, tokensToDollars, countTokens, replacementTokenSavings } from './utils.js';
 import { ZERO_SAVINGS, NEGATIVE_SAVINGS } from './token-costs.js';
 
-const MIN_WORDS_FOR_COMPRESSION = 10;
+const MIN_WORDS_FOR_COMPRESSION = 30;
 const MIN_SAVINGS_RATIO = 0.05; // Only compress if saving >5%
 
 const ANALYTICS_URL = 'https://tokenshrink.com/api/analytics';
