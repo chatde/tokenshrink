@@ -24,6 +24,7 @@
   "license": "MIT",
   "dependencies": {
     "@neondatabase/serverless": "^1.0.2",
+    "@sentry/nextjs": "^10.43.0",
     "@tailwindcss/postcss": "^4.2.0",
     "@vercel/analytics": "^1.6.1",
     "drizzle-orm": "^0.45.1",
@@ -38,9 +39,11 @@
     "tailwindcss": "^4.2.0"
   },
   "devDependencies": {
+    "@types/react": "19.2.14",
     "@vitest/coverage-v8": "^4.1.0",
     "drizzle-kit": "^0.31.9",
     "gpt-tokenizer": "^3.4.0",
+    "typescript": "5.9.3",
     "vitest": "^4.0.18"
   }
 }
