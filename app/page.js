@@ -2,6 +2,8 @@ import Navbar from './components/Navbar';
 import CompressorWidget from './components/CompressorWidget';
 import Shrinkray from './components/Shrinkray';
 import TokenCounter from './components/TokenCounter';
+import LogoBar from './components/LogoBar';
+import AuroraCard from './components/AuroraCard';
 import Link from 'next/link';
 import FadeIn from '@/components/fade-in';
 import SplitText from '@/components/split-text';
@@ -61,6 +63,11 @@ export default function Home() {
           </FadeIn>
         </section>
 
+        {/* Works With logo bar */}
+        <FadeIn delay={600}>
+          <LogoBar />
+        </FadeIn>
+
         {/* Social proof / stats */}
         <section className="px-6 py-16 border-t border-border bg-bg-secondary">
           <div className="max-w-4xl mx-auto">
@@ -77,11 +84,11 @@ export default function Home() {
               ].map(({ value, label, icon }, i) => (
                 <FadeIn key={label} delay={(i + 1) * 100}>
                   <TiltWrapper>
-                    <div className="savings-glow border border-savings/15 rounded-xl p-5 text-center bg-bg-card h-full">
+                    <AuroraCard className="savings-glow border border-savings/15 rounded-xl p-5 text-center bg-bg-card h-full">
                       <div className="text-savings/40 text-lg mb-2 font-mono">{icon}</div>
                       <div className="text-2xl font-bold text-savings font-mono">{value}</div>
                       <div className="text-xs text-text-muted mt-1">{label}</div>
-                    </div>
+                    </AuroraCard>
                   </TiltWrapper>
                 </FadeIn>
               ))}
@@ -119,11 +126,11 @@ export default function Home() {
               ].map(({ step, title, desc }, i) => (
                 <FadeIn key={step} delay={i * 150}>
                   <TiltWrapper>
-                    <div className="bg-bg-card border border-border rounded-xl p-6 hover:border-border-hover transition-colors h-full">
+                    <AuroraCard className="bg-bg-card border border-border rounded-xl p-6 hover:border-border-hover hover:-translate-y-0.5 transition-all h-full">
                       <div className="text-3xl font-bold text-savings/20 mb-3 font-mono">{step}</div>
                       <h3 className="text-base font-semibold text-text mb-2">{title}</h3>
                       <p className="text-sm text-text-secondary">{desc}</p>
-                    </div>
+                    </AuroraCard>
                   </TiltWrapper>
                 </FadeIn>
               ))}

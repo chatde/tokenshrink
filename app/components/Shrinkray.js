@@ -3,11 +3,12 @@ export default function Shrinkray({ size = 120, className = '' }) {
     <svg
       width={size}
       height={size}
-      viewBox="0 0 120 120"
+      viewBox="0 0 140 120"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
       className={className}
       aria-label="Shrinkray mascot"
+      style={{ filter: 'drop-shadow(0 0 20px rgba(0, 209, 125, 0.2))' }}
     >
       {/* Body - intentionally tiny (it IS shrunken) */}
       <ellipse cx="55" cy="72" rx="18" ry="22" fill="#10b981" />
@@ -50,9 +51,13 @@ export default function Shrinkray({ size = 120, className = '' }) {
       <rect x="80" y="50" width="24" height="8" rx="2" fill="#94a3b8" />
       {/* Gun barrel */}
       <rect x="106" y="50" width="10" height="8" rx="2" fill="#475569" />
-      {/* Gun tip / emitter */}
+      {/* Gun tip / emitter with animated glow */}
       <circle cx="118" cy="54" r="4" fill="#10b981" />
-      <circle cx="118" cy="54" r="2" fill="#6ee7b7" />
+      <circle cx="118" cy="54" r="2" fill="#6ee7b7" className="ray-tip-glow" />
+      {/* Ray beams shooting out */}
+      <line x1="122" y1="54" x2="138" y2="54" stroke="#6ee7b7" strokeWidth="1.5" className="ray-beam" />
+      <line x1="122" y1="52" x2="135" y2="48" stroke="#6ee7b7" strokeWidth="1" className="ray-beam" style={{ animationDelay: '0.3s' }} />
+      <line x1="122" y1="56" x2="135" y2="60" stroke="#6ee7b7" strokeWidth="1" className="ray-beam" style={{ animationDelay: '0.6s' }} />
       {/* Gun handle */}
       <rect x="84" y="60" width="8" height="14" rx="2" fill="#475569" />
       {/* Gun details - energy lines */}

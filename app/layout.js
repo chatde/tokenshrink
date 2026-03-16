@@ -1,4 +1,4 @@
-import { Space_Mono, Geist_Mono } from 'next/font/google';
+import { Space_Mono, Geist_Mono, JetBrains_Mono } from 'next/font/google';
 import './globals.css';
 import Providers from './components/Providers';
 import SmoothScroll from '@/components/smooth-scroll';
@@ -14,6 +14,13 @@ const spaceMono = Space_Mono({
 const geistMono = Geist_Mono({
   variable: '--font-geist-mono',
   subsets: ['latin'],
+});
+
+const jetbrainsMono = JetBrains_Mono({
+  variable: '--font-jetbrains-mono',
+  subsets: ['latin'],
+  display: 'swap',
+  weight: ['300', '400', '500', '600', '700'],
 });
 
 export const metadata = {
@@ -39,7 +46,7 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en" className={`${spaceMono.variable} ${geistMono.variable}`}>
+    <html lang="en" className={`${spaceMono.variable} ${geistMono.variable} ${jetbrainsMono.variable}`}>
       <body className="min-h-screen">
         <script
           type="application/ld+json"

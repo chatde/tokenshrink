@@ -2,20 +2,20 @@
 @import "lenis/dist/lenis.css";
 
 @theme {
-  --color-bg: #050505;
-  --color-bg-secondary: #141414;
-  --color-bg-card: #1a1a1a;
-  --color-border: #262626;
-  --color-border-hover: #404040;
+  --color-bg: #080808;
+  --color-bg-secondary: #111111;
+  --color-bg-card: #161616;
+  --color-border: #1e1e1e;
+  --color-border-hover: #333333;
   --color-savings: #00d17d;
   --color-savings-dim: #065f46;
   --color-cost: #ef4444;
   --color-cost-dim: #7f1d1d;
-  --color-text: #fafafa;
-  --color-text-secondary: #a1a1aa;
-  --color-text-muted: #71717a;
+  --color-text: #f0f0f0;
+  --color-text-secondary: #999999;
+  --color-text-muted: #5a5a5a;
   --font-sans: var(--font-space-mono), 'Courier New', monospace;
-  --font-mono: var(--font-geist-mono), 'Fira Code', monospace;
+  --font-mono: var(--font-jetbrains-mono), var(--font-geist-mono), 'Fira Code', monospace;
 }
 
 body {
@@ -136,6 +136,55 @@ body {
 /* Glowing border */
 .savings-glow {
   box-shadow: 0 0 20px rgba(0, 209, 125, 0.15), inset 0 0 20px rgba(0, 209, 125, 0.05);
+}
+
+/* Aurora hover glow — set --mx/--my via JS onMouseMove */
+.aurora-hover {
+  position: relative;
+  overflow: hidden;
+}
+.aurora-hover::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at var(--mx, 50%) var(--my, 50%), rgba(0, 209, 125, 0.04), transparent 60%);
+  pointer-events: none;
+}
+
+/* Diff highlights for CompressorWidget */
+.diff-removed {
+  background: rgba(239, 68, 68, 0.12);
+  color: rgba(239, 68, 68, 0.7);
+  text-decoration: line-through;
+  text-decoration-color: rgba(239, 68, 68, 0.3);
+  border-radius: 2px;
+  padding: 0 2px;
+}
+.diff-added {
+  background: rgba(0, 209, 125, 0.12);
+  color: #00d17d;
+  border-radius: 2px;
+  padding: 0 2px;
+  font-weight: 500;
+}
+
+/* Shrinkray beam animations */
+@keyframes ray-pulse {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 0.9; }
+}
+.ray-tip-glow {
+  animation: ray-pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes ray-beam {
+  0% { opacity: 0; stroke-dashoffset: 30; }
+  50% { opacity: 0.6; }
+  100% { opacity: 0; stroke-dashoffset: 0; }
+}
+.ray-beam {
+  animation: ray-beam 2s ease-out infinite;
+  stroke-dasharray: 8 4;
 }
 
 /* Selection color — savings green */

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 
 const SAMPLE_PROMPT = `You are an expert full-stack development assistant. Your primary responsibility is to help engineers build, debug, and deploy production-ready applications. Your main task is to provide clear guidance on architecture, authentication, database design, API development, and deployment configuration.
 
@@ -24,12 +24,81 @@ Remember to consider performance optimization in every implementation. Do not fo
 
 If you are unsure about something, acknowledge it honestly rather than providing incorrect information. If you are not sure about the best approach, present multiple options with their tradeoffs.`;
 
+function AnimatedNumber({ value, suffix = '' }) {
+  const ref = useRef(null);
+  const prevValue = useRef(0);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const from = prevValue.current;
+    const to = value;
+    const duration = 600;
+    const start = performance.now();
+
+    function tick(now) {
+      const progress = Math.min((now - start) / duration, 1);
+      const eased = 1 - Math.pow(1 - progress, 3);
+      const current = Math.round(from + (to - from) * eased);
+      el.textContent = current.toLocaleString() + suffix;
+      if (progress < 1) requestAnimationFrame(tick);
+    }
+
+    requestAnimationFrame(tick);
+    prevValue.current = to;
+  }, [value, suffix]);
+
+  return <span ref={ref}>{value.toLocaleString()}{suffix}</span>;
+}
+
+function DiffText({ original, compressed, type }) {
+  if (type === 'original' && compressed) {
+    const parts = [];
+    let remaining = original;
+    let key = 0;
+
+    const removed = findRemovedPhrases(original, compressed);
+    for (const phrase of removed) {
+      const idx = remaining.indexOf(phrase);
+      if (idx === -1) continue;
+      if (idx > 0) parts.push(<span key={key++}>{remaining.substring(0, idx)}</span>);
+      parts.push(<mark key={key++} className="diff-removed">{phrase}</mark>);
+      remaining = remaining.substring(idx + phrase.length);
+    }
+    if (remaining) parts.push(<span key={key++}>{remaining}</span>);
+    return parts.length > 0 ? <>{parts}</> : <>{original}</>;
+  }
+
+  return <>{type === 'compressed' ? compressed : original}</>;
+}
+
+function findRemovedPhrases(original, compressed) {
+  const removed = [];
+  const origWords = original.split(/(\s+)/);
+  const compWords = new Set(compressed.split(/(\s+)/).filter(w => w.trim()));
+
+  let phrase = '';
+  for (const word of origWords) {
+    if (word.trim() && !compWords.has(word.trim())) {
+      phrase += word;
+    } else {
+      if (phrase.trim().length > 10) removed.push(phrase);
+      phrase = '';
+      if (!word.trim()) phrase = '';
+    }
+  }
+  if (phrase.trim().length > 10) removed.push(phrase);
+
+  return removed.slice(0, 15);
+}
+
 export default function CompressorWidget() {
   const [input, setInput] = useState('');
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [copied, setCopied] = useState(false);
+
   const handleShrink = useCallback(async () => {
     const text = input.trim();
     if (!text) return;
@@ -110,7 +179,7 @@ export default function CompressorWidget() {
           onChange={(e) => { setInput(e.target.value); setResult(null); }}
           onKeyDown={handleKeyDown}
           placeholder="Paste your prompt, system message, or any text..."
-          className="w-full h-48 p-5 bg-bg-card border border-border rounded-xl text-text font-mono text-sm resize-none focus:outline-none focus:border-savings/50 focus:ring-1 focus:ring-savings/20 transition-all placeholder:text-text-muted"
+          className="w-full h-48 p-5 bg-bg-card border border-border rounded-xl text-text font-mono text-sm resize-none focus:outline-none focus:border-savings/50 focus:ring-1 focus:ring-savings/20 focus:shadow-[0_0_60px_rgba(0,209,125,0.12)] transition-all placeholder:text-text-muted"
         />
         <div className="absolute bottom-3 left-5 text-xs text-text-muted">
           {wordCount > 0 ? `${wordCount} words` : ''}
@@ -125,7 +194,7 @@ export default function CompressorWidget() {
         <button
           onClick={handleShrink}
           disabled={loading || !input.trim()}
-          className="px-8 py-3 bg-savings text-bg font-semibold rounded-lg hover:bg-savings/90 disabled:opacity-40 disabled:cursor-not-allowed transition-all text-sm"
+          className="px-8 py-3 bg-savings text-bg font-semibold rounded-lg hover:bg-savings/90 hover:-translate-y-px hover:shadow-[0_4px_20px_rgba(0,209,125,0.25)] active:translate-y-0 disabled:opacity-40 disabled:cursor-not-allowed transition-all text-sm"
         >
           {loading ? (
             <span className="flex items-center gap-2">
@@ -168,10 +237,10 @@ export default function CompressorWidget() {
             </div>
           ) : (
             <>
-              {/* Savings banner */}
+              {/* Savings banner with animated counter */}
               <div className="text-center mb-6">
                 <div className="text-3xl font-bold text-savings animate-pulse-savings">
-                  {result.stats.tokensSaved.toLocaleString()} tokens saved
+                  <AnimatedNumber value={result.stats.tokensSaved} suffix=" tokens saved" />
                 </div>
                 <div className="text-sm text-text-muted mt-1">
                   {result.stats.ratio}x compression &middot; {result.stats.originalTokens.toLocaleString()} &rarr; {result.stats.totalCompressedTokens.toLocaleString()} tokens
@@ -179,7 +248,7 @@ export default function CompressorWidget() {
                 </div>
               </div>
 
-              {/* Split view */}
+              {/* Split view with diff highlights */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {/* Original */}
                 <div className="rounded-xl border border-cost/20 bg-bg-card overflow-hidden">
@@ -190,7 +259,9 @@ export default function CompressorWidget() {
                     </span>
                   </div>
                   <div className="p-4 max-h-64 overflow-y-auto">
-                    <pre className="text-xs text-text-secondary font-mono whitespace-pre-wrap break-words">{input}</pre>
+                    <pre className="text-xs text-text-secondary font-mono whitespace-pre-wrap break-words">
+                      <DiffText original={input} compressed={result.compressed} type="original" />
+                    </pre>
                   </div>
                 </div>
 
