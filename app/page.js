@@ -55,6 +55,13 @@ export default function Home() {
                 <br />
                 TokenShrink compresses prompts — same results, fewer tokens. Open source.
               </p>
+              <p className="mt-6 text-xs text-text-muted font-mono tracking-wide text-center">
+                Typical savings: <span className="text-savings">15-35%</span> on system prompts
+                <span className="hidden sm:inline"> · </span><br className="sm:hidden" />
+                Works with <span className="text-savings">8</span> AI providers
+                <span className="hidden sm:inline"> · </span><br className="sm:hidden" />
+                <span className="text-savings">51</span> tests passing
+              </p>
             </FadeIn>
           </div>
 

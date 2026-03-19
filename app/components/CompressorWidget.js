@@ -219,6 +219,17 @@ export default function CompressorWidget() {
         )}
       </div>
 
+      <div className="flex gap-3 mt-3 justify-center">
+        <a href="https://www.npmjs.com/package/tokenshrink" target="_blank" rel="noopener noreferrer"
+          className="text-xs text-text-muted border border-border rounded-full px-3 py-1 hover:border-savings/40 hover:text-savings transition-colors">
+          npm install tokenshrink
+        </a>
+        <a href="/docs"
+          className="text-xs text-text-muted border border-border rounded-full px-3 py-1 hover:border-savings/40 hover:text-savings transition-colors">
+          Read Docs &rarr;
+        </a>
+      </div>
+
       {/* Error */}
       {error && (
         <div className="mt-4 p-4 bg-cost-dim/30 border border-cost/20 rounded-lg text-cost text-sm animate-fade-in">
@@ -246,6 +257,14 @@ export default function CompressorWidget() {
                   {result.stats.ratio}x compression &middot; {result.stats.originalTokens.toLocaleString()} &rarr; {result.stats.totalCompressedTokens.toLocaleString()} tokens
                   {result.stats.dollarsSaved > 0.005 && ` · $${result.stats.dollarsSaved.toFixed(2)} saved`}
                 </div>
+                {result.stats.tokensSaved > 0 && (
+                  <div className="mt-3 flex gap-3 text-xs text-text-muted">
+                    <span>~${((result.stats.tokensSaved / 1000000) * 2.5 * 1000).toFixed(2)}/1K requests</span>
+                    <span>·</span>
+                    <span>~${((result.stats.tokensSaved / 1000000) * 2.5 * 100000).toFixed(0)}/100K requests</span>
+                    <span className="text-text-secondary">(GPT-4o input pricing)</span>
+                  </div>
+                )}
               </div>
 
               {/* Split view with diff highlights */}
