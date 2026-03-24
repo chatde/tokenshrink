@@ -5,6 +5,7 @@ import { compressions, usageMeters, users, apiKeys } from '@/schema/schema';
 import { eq, and, isNull } from 'drizzle-orm';
 import { compress } from '@/app/lib/compression/engine';
 import { validateCompressionInput } from '@/app/lib/validate';
+import { checkRateLimit, rateLimitResponse } from '@/app/lib/rate-limit';
 import {
   getPlan,
   getCurrentPeriod,
@@ -13,6 +14,11 @@ import { createHash } from 'crypto';
 
 export async function POST(request) {
   try {
+    // Rate limit by IP — 10 requests per minute for anonymous, 30 for authenticated
+    const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim()
+      || request.headers.get('x-real-ip')
+      || 'unknown';
+
     const body = await request.json();
     const { text, domain } = body;
 
@@ -45,6 +51,15 @@ export async function POST(request) {
       if (session?.user?.id) {
         userId = session.user.id;
       }
+    }
+
+    // Rate limit — authenticated users get 30/min, anonymous get 10/min
+    const rateKey = userId ? `user:${userId}` : `ip:${ip}`;
+    const rateOptions = userId ? { limit: 30, windowMs: 60_000 } : { limit: 10, windowMs: 60_000 };
+    const { allowed, remaining, retryAfter } = checkRateLimit(rateKey, rateOptions);
+
+    if (!allowed) {
+      return rateLimitResponse(retryAfter, { 'X-RateLimit-Limit': String(rateOptions.limit) });
     }
 
     // Validate input
