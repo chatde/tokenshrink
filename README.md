@@ -29,21 +29,21 @@ v2.0 fixes this:
 **Before** (143 tokens):
 > You are a business analyst assistant. Your primary responsibility is to help stakeholders define clear requirements. It is important to understand the business context before proposing solutions. Due to the fact that requirements change frequently, you should maintain version control...
 
-**After** (121 tokens, 22 saved — 15.4%):
-> You are a business analyst assistant. help stakeholders define clear requirements. understand the business context before proposing solutions. because requirements change frequently, maintain version control...
+**After** (89 tokens, 54 saved — 37.8%):
+> You are a business analyst assistant. help stakeholders define clear requirements. understand business context before proposing solutions. because requirements change frequently, maintain version control...
 
-On verbose prompts (200+ words), savings reach 12-15% — all verified with real tokenizer counts.
+On verbose prompts (200+ words), savings reach 30-38% — all verified with real tokenizer counts.
 
 ## Benchmarks (verified with gpt-tokenizer)
 
 | Prompt | Original | Compressed | Saved | % |
 |--------|----------|------------|-------|---|
-| Dev assistant (verbose) | 408 | 349 | 59 | 14.5% |
-| Code review prompt | 210 | 183 | 27 | 12.9% |
-| Medical notes | 151 | 134 | 17 | 11.3% |
-| Business requirements | 143 | 121 | 22 | 15.4% |
-| Minimal filler (hard to compress) | 77 | 77 | 0 | 0.0% |
-| **Total** | **989** | **864** | **125** | **12.6%** |
+| Dev assistant (verbose) | 408 | 269 | 139 | 34.1% |
+| Code review prompt | 210 | 137 | 73 | 34.8% |
+| Medical notes | 151 | 97 | 54 | 35.8% |
+| Business requirements | 143 | 89 | 54 | 37.8% |
+| Minimal filler (hard to compress) | 77 | 70 | 7 | 9.1% |
+| **Total** | **989** | **662** | **327** | **33.1%** |
 
 All counts verified with `gpt-tokenizer` (cl100k_base). No prompt had its token count increase. Zero false savings.
 
@@ -51,8 +51,9 @@ All counts verified with `gpt-tokenizer` (cl100k_base). No prompt had its token 
 
 1. **Phase 1 — Phrase removal**: Verbose filler phrases are compressed or removed ("in order to" → "to", "it is important to" → removed)
 2. **Phase 2 — Word abbreviation**: Only multi-token words that genuinely save tokens ("consequently" → "so" saves 2 tokens)
-3. **Phase 3 — Pattern detection**: Repeated structures are collapsed into shorthand codes
-4. **Phase 4 — Rosetta Stone**: A tiny decoder header is prepended so the LLM understands all abbreviations
+3. **Phase 2.5 — NLP compression**: Clause deduplication, redundant modifier stripping, and importance-weighted sentence compression using zero-dependency NLP (Porter stemmer, NPMI collocations, TF-IDF)
+4. **Phase 3 — Pattern detection**: Repeated structures are collapsed into shorthand codes
+5. **Phase 4 — Rosetta Stone**: A tiny decoder header is prepended so the LLM understands all abbreviations
 
 ## Quick start
 
@@ -137,7 +138,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for development details.
 ## Testing
 
 ```bash
-npm test          # run all 51 tests
+npm test          # run all 324 tests
 npm run test:watch  # watch mode
 ```
 

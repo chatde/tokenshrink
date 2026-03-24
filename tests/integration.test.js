@@ -322,12 +322,15 @@ describe('End-to-end compression workflow', () => {
       const text = 'This text has minimal verbose patterns and mostly unique content that cannot compress well. Most words are already efficient. The sentence structure is concise. No repeated phrases exist here today.';
       const result = compress(text);
 
-      // Should either be tooShort or belowThreshold or successful
-      // belowThreshold might be undefined if tooShort is true
+      // Should either be tooShort, belowThreshold, or successfully compressed
+      // NLP compression may push previously-below-threshold text into savings territory
       if (result.stats.belowThreshold !== undefined) {
         expect(typeof result.stats.belowThreshold).toBe('boolean');
-      } else {
+      } else if (result.stats.tooShort !== undefined) {
         expect(typeof result.stats.tooShort).toBe('boolean');
+      } else {
+        // NLP compression made this text compressible — valid outcome
+        expect(result.stats.tokensSaved).toBeGreaterThanOrEqual(0);
       }
     });
 
