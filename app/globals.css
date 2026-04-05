@@ -12,8 +12,8 @@
   --color-cost: #ef4444;
   --color-cost-dim: #7f1d1d;
   --color-text: #f0f0f0;
-  --color-text-secondary: #999999;
-  --color-text-muted: #5a5a5a;
+  --color-text-secondary: #c0c0c0;
+  --color-text-muted: #888888;
   --font-sans: var(--font-space-mono), 'Courier New', monospace;
   --font-mono: var(--font-jetbrains-mono), var(--font-geist-mono), 'Fira Code', monospace;
 }
