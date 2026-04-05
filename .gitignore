@@ -7,3 +7,10 @@ node_modules/
 .DS_Store
 .vercel
 .env*.local
+
+# Generated/local files
+.env.sentry-build-plugin
+*.tgz
+screenshots/
+bug-hunting-report.md
+preview-*.html
