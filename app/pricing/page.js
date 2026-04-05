@@ -35,13 +35,13 @@ const FREE_FEATURES = [
 
 const ADVANCED_FEATURES = [
   { label: 'Everything in Free', included: true },
-  { label: 'Rosetta Protocol (Enigma codec)', included: true },
-  { label: 'Session codebook — negotiated cipher', included: true },
-  { label: 'Domain rotors (React / Node / Python / Supabase)', included: true },
-  { label: 'Sub-agent vocab inheritance', included: true },
-  { label: 'Cross-session learning — Hall of Fame', included: true },
-  { label: 'Compaction-safe Rosetta re-injection', included: true },
-  { label: 'Advanced usage dashboard', included: true },
+  { label: 'Rosetta Protocol — session cipher that compresses using your project vocab', included: true },
+  { label: 'Session codebook — codec negotiated once, applied to every message', included: true },
+  { label: 'Domain rotors — auto-loads React / Node / Python / Supabase vocab packs', included: true },
+  { label: 'Sub-agent vocab inheritance — all agents share the same cipher', included: true },
+  { label: 'Cross-session learning — frequent terms promoted, dead weight pruned', included: true },
+  { label: 'Compaction-safe — Rosetta re-injects if context window resets', included: true },
+  { label: 'Advanced usage dashboard with dollar savings', included: true },
 ];
 
 export default function PricingPage() {

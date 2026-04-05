@@ -53,7 +53,8 @@ export default function Home() {
               <p className="mt-4 text-lg text-text-secondary max-w-2xl mx-auto">
                 Your prompts are verbose. Your models don&apos;t need them to be.
                 <br />
-                TokenShrink compresses prompts — same results, fewer tokens. Works with Claude, GPT, Gemini, Ollama — any LLM. Open source.
+                TokenShrink compresses prompts — same results, fewer tokens. Works with Claude, GPT, Gemini, Ollama — any LLM.{' '}
+                <a href="https://github.com/chatde/tokenshrink" target="_blank" rel="noopener noreferrer" className="text-savings hover:underline">Open source ↗</a>
               </p>
               <p className="mt-6 text-xs text-text-muted font-mono tracking-wide text-center">
                 Typical savings: <span className="text-savings">15-35%</span> on system prompts
