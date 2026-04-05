@@ -19,8 +19,8 @@ describe('Billing plans configuration', () => {
   it('advanced plan has correct pricing', () => {
     const adv = PLANS.advanced;
     expect(adv.name).toBe('Advanced');
-    expect(adv.price).toBe(9);
-    expect(adv.priceAnnual).toBe(79);
+    expect(adv.price).toBe(5);
+    expect(adv.priceAnnual).toBe(36);
   });
 
   it('advanced plan has Rosetta Protocol feature', () => {
@@ -45,7 +45,7 @@ describe('Billing plans configuration', () => {
 describe('Checkout route — PRICE_MAP', () => {
   it('checkout route only accepts advanced plan', async () => {
     const { readFileSync } = await import('fs');
-    const source = readFileSync('/Volumes/AI-Models/tokenshrink/app/api/billing/checkout/route.js', 'utf8');
+    const source = readFileSync(new URL('../app/api/billing/checkout/route.js', import.meta.url), 'utf8');
 
     // Verify PRICE_MAP structure
     expect(source).toContain('PRICE_MAP');
@@ -58,7 +58,7 @@ describe('Checkout route — PRICE_MAP', () => {
 describe('Webhook handler', () => {
   it('handles checkout.session.completed event type', async () => {
     const { readFileSync } = await import('fs');
-    const source = readFileSync('/Volumes/AI-Models/tokenshrink/app/api/billing/webhook/route.js', 'utf8');
+    const source = readFileSync(new URL('../app/api/billing/webhook/route.js', import.meta.url), 'utf8');
 
     expect(source).toContain('checkout.session.completed');
     expect(source).toContain('customer.subscription.updated');
@@ -67,7 +67,7 @@ describe('Webhook handler', () => {
 
   it('webhook verifies Stripe signature', async () => {
     const { readFileSync } = await import('fs');
-    const source = readFileSync('/Volumes/AI-Models/tokenshrink/app/api/billing/webhook/route.js', 'utf8');
+    const source = readFileSync(new URL('../app/api/billing/webhook/route.js', import.meta.url), 'utf8');
 
     expect(source).toContain('stripe-signature');
     expect(source).toContain('constructEvent');
@@ -76,7 +76,7 @@ describe('Webhook handler', () => {
 
   it('webhook downgrades to free on subscription.deleted', async () => {
     const { readFileSync } = await import('fs');
-    const source = readFileSync('/Volumes/AI-Models/tokenshrink/app/api/billing/webhook/route.js', 'utf8');
+    const source = readFileSync(new URL('../app/api/billing/webhook/route.js', import.meta.url), 'utf8');
 
     expect(source).toContain("plan: 'free'");
     expect(source).toContain("status: 'canceled'");
@@ -86,7 +86,7 @@ describe('Webhook handler', () => {
 describe('Env vars documentation', () => {
   it('.env.example includes all required Stripe vars', async () => {
     const { readFileSync } = await import('fs');
-    const envExample = readFileSync('/Volumes/AI-Models/tokenshrink/.env.example', 'utf8');
+    const envExample = readFileSync(new URL('../.env.example', import.meta.url), 'utf8');
 
     expect(envExample).toContain('STRIPE_SECRET_KEY');
     expect(envExample).toContain('STRIPE_WEBHOOK_SECRET');

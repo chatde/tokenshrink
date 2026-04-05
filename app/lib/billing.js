@@ -24,8 +24,8 @@ export const PLANS = {
   },
   advanced: {
     name: 'Advanced',
-    price: 9,
-    priceAnnual: 79,
+    price: 5,
+    priceAnnual: 36,
     wordsPerMonth: 999999999,
     maxWordsPerShrink: 100000,
     stripePriceId: process.env.STRIPE_ADVANCED_PRICE_ID,

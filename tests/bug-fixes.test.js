@@ -76,7 +76,7 @@ describe('Bug Fix: Dead PRICE_MAP entries removed', () => {
   it('PRICE_MAP only has advanced plan', async () => {
     // Read the checkout route source and verify no pro/team references
     const { readFileSync } = await import('fs');
-    const source = readFileSync('/Volumes/AI-Models/tokenshrink/app/api/billing/checkout/route.js', 'utf8');
+    const source = readFileSync(new URL('../app/api/billing/checkout/route.js', import.meta.url), 'utf8');
 
     expect(source).not.toContain('STRIPE_PRO_PRICE_ID');
     expect(source).not.toContain('STRIPE_TEAM_PRICE_ID');
