@@ -3,6 +3,7 @@ import { detectStrategy, findRepeatedPhrases } from './strategies.js';
 import { generateRosetta, countRosettaWords, countRosettaTokens } from './rosetta.js';
 import { countWords, wordsToTokens, tokensToDollars, countTokens, replacementTokenSavings } from './utils.js';
 import { ZERO_SAVINGS, NEGATIVE_SAVINGS } from './token-costs.js';
+import { TIER_A_PHRASES, TIER_B_PHRASES, TIER_B_MIN_TOKENS, TIER_B_MARGIN } from './huffman-tables.js';
 
 const MIN_WORDS_FOR_COMPRESSION = 30;
 const MIN_SAVINGS_RATIO = 0.05; // Only compress if saving >5%
@@ -22,7 +23,14 @@ function pingAnalytics(before, after, source) {
 }
 
 export function compress(text, options = {}) {
-  const { domain = 'auto', forceStrategy, tokenizer, analytics = true, source = 'sdk' } = options;
+  const {
+    domain = 'auto',
+    forceStrategy,
+    tokenizer,
+    analytics = true,
+    source = 'sdk',
+    tier,
+  } = options;
   const originalText = text.trim();
   const originalWords = countWords(originalText);
   const originalTokens = countTokens(originalText, tokenizer);
@@ -59,9 +67,52 @@ export function compress(text, options = {}) {
 
   const dict = getDictionary(detected.domain);
 
-  // Phase 1: Phrase compression (longest first to avoid partial matches)
   let compressed = originalText;
   const replacementCounts = new Map(); // track occurrences per replacement
+  const huffmanReplacements = [];
+
+  // Phase 0: Huffman frequency table compression
+  if (tier !== 'basic') {
+    // Tier A: always apply (universally known, no header)
+    for (const [phrase, abbr] of Object.entries(TIER_A_PHRASES)) {
+      if (!abbr) continue;
+      const regex = new RegExp(`\\b${escapeRegex(phrase)}\\b`, 'gi');
+      if (regex.test(compressed)) {
+        compressed = compressed.replace(regex, abbr);
+      }
+    }
+
+    // Tier B: only apply when token count warrants it
+    if (originalTokens >= TIER_B_MIN_TOKENS) {
+      // Estimate header cost: ~3 tokens per Tier B entry used
+      const tierBEntries = [];
+      let projectedSavings = 0;
+
+      for (const [phrase, abbr] of Object.entries(TIER_B_PHRASES)) {
+        if (!abbr) continue;
+        const regex = new RegExp(`\\b${escapeRegex(phrase)}\\b`, 'gi');
+        const matches = compressed.match(regex);
+        if (matches && matches.length > 0) {
+          const savings = replacementTokenSavings(phrase, abbr, tokenizer) * matches.length;
+          if (savings > 0) {
+            tierBEntries.push({ phrase, abbr, regex, count: matches.length, savings });
+            projectedSavings += savings;
+          }
+        }
+      }
+
+      // Only apply Tier B if total savings exceed header cost by TIER_B_MARGIN
+      const headerCost = tierBEntries.length * 3; // ~3 tokens per entry
+      if (projectedSavings > headerCost * TIER_B_MARGIN) {
+        for (const { phrase, abbr, regex, count } of tierBEntries) {
+          compressed = compressed.replace(regex, abbr);
+          huffmanReplacements.push({ original: phrase, replacement: abbr, occurrences: count });
+        }
+      }
+    }
+  }
+
+  // Phase 1: Phrase compression (longest first to avoid partial matches)
 
   const phraseEntries = Object.entries(dict)
     .filter(([key]) => key.includes(' '))
@@ -154,7 +205,11 @@ export function compress(text, options = {}) {
     .trim();
 
   // Generate Rosetta Stone (smart — only includes net-positive, non-universal entries)
-  const rosetta = generateRosetta(usedReplacements, patternReplacements, tokenizer);
+  const rosetta = generateRosetta(
+    [...huffmanReplacements, ...usedReplacements],
+    patternReplacements,
+    tokenizer,
+  );
   const rosettaWords = countRosettaWords(rosetta);
   const rosettaTokens = countRosettaTokens(rosetta, tokenizer);
   const compressedWords = countWords(compressed);

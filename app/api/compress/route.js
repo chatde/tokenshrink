@@ -10,6 +10,7 @@ import {
   getPlan,
   getCurrentPeriod,
 } from '@/app/lib/billing';
+import { getCompressionTier } from '@/app/lib/gates';
 import { createHash } from 'crypto';
 
 export async function POST(request) {
@@ -53,6 +54,11 @@ export async function POST(request) {
       }
     }
 
+    // Check compression tier
+    const tierInfo = await getCompressionTier(userId);
+    const isProUser = tierInfo.tier === 'pro';
+    const isFreeExceeded = tierInfo.tier === 'free_exceeded';
+
     // Rate limit — authenticated users get 30/min, anonymous get 10/min
     const rateKey = userId ? `user:${userId}` : `ip:${ip}`;
     const rateOptions = userId ? { limit: 30, windowMs: 60_000 } : { limit: 10, windowMs: 60_000 };
@@ -69,7 +75,10 @@ export async function POST(request) {
     }
 
     // Compress
-    const result = compress(validation.text, { domain });
+    const result = compress(validation.text, {
+      domain,
+      tier: isProUser ? 'pro' : (isFreeExceeded ? 'basic' : 'free'),
+    });
 
     // Log compression and update usage (for authenticated users)
     if (userId) {
@@ -124,10 +133,19 @@ export async function POST(request) {
       }
     }
 
+    const responseExtra = isFreeExceeded ? {
+      plan: 'free',
+      callsUsed: tierInfo.callsUsed,
+      callsLimit: 500,
+      upgrade_prompt: 'You\'ve used 500/500 free API calls this month. Upgrade to Pro for unlimited calls + advanced compression.',
+      upgrade_url: 'https://tokenshrink.com/pricing',
+    } : {};
+
     return NextResponse.json({
       compressed: result.compressed,
       rosetta: result.rosetta,
       stats: result.stats,
+      ...responseExtra,
     });
   } catch (error) {
     console.error('Compression error:', error);
