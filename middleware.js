@@ -13,7 +13,7 @@ function getLimitForPath(pathname) {
   return 30;
 }
 
-export async function proxy(request) {
+export async function middleware(request) {
   const { pathname } = request.nextUrl;
 
   // Only rate-limit API routes

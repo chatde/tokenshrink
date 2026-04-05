@@ -22,13 +22,25 @@ const currencyFormatter = new Intl.NumberFormat('en-US', {
   maximumFractionDigits: 2,
 });
 
+function sanitizeTokensPerDay(value) {
+  if (!Number.isFinite(value)) {
+    return DEFAULT_TOKENS_PER_DAY;
+  }
+
+  return Math.min(
+    MAX_TOKENS_PER_DAY,
+    Math.max(MIN_TOKENS_PER_DAY, Math.round(value / STEP) * STEP),
+  );
+}
+
 export default function SavingsCalculator() {
   const inputId = useId();
   const [tokensPerDay, setTokensPerDay] = useState(DEFAULT_TOKENS_PER_DAY);
+  const safeTokensPerDay = sanitizeTokensPerDay(tokensPerDay);
 
-  const tokensSavedPerDay = Math.round(tokensPerDay * COMPRESSION_RATE);
+  const tokensSavedPerDay = Math.round(safeTokensPerDay * COMPRESSION_RATE);
   const monthlyCost =
-    (tokensPerDay / 1_000_000) * GPT_4O_INPUT_COST_PER_MILLION * DAYS_PER_MONTH;
+    (safeTokensPerDay / 1_000_000) * GPT_4O_INPUT_COST_PER_MILLION * DAYS_PER_MONTH;
   const monthlySavings = monthlyCost * COMPRESSION_RATE;
   const paybackDays = monthlySavings > 0
     ? Math.ceil((ADVANCED_MONTHLY_PRICE / monthlySavings) * DAYS_PER_MONTH)
@@ -61,8 +73,8 @@ export default function SavingsCalculator() {
                 min={MIN_TOKENS_PER_DAY}
                 max={MAX_TOKENS_PER_DAY}
                 step={STEP}
-                value={tokensPerDay}
-                onChange={(event) => setTokensPerDay(Number(event.target.value))}
+                value={safeTokensPerDay}
+                onChange={(event) => setTokensPerDay(sanitizeTokensPerDay(Number(event.target.value)))}
                 className="w-full accent-savings"
               />
               <input
@@ -70,15 +82,9 @@ export default function SavingsCalculator() {
                 min={MIN_TOKENS_PER_DAY}
                 max={MAX_TOKENS_PER_DAY}
                 step={STEP}
-                value={tokensPerDay}
+                value={safeTokensPerDay}
                 onChange={(event) => {
-                  const nextValue = Number(event.target.value);
-                  if (Number.isNaN(nextValue)) {
-                    return;
-                  }
-                  setTokensPerDay(
-                    Math.min(MAX_TOKENS_PER_DAY, Math.max(MIN_TOKENS_PER_DAY, nextValue)),
-                  );
+                  setTokensPerDay(sanitizeTokensPerDay(Number(event.target.value)));
                 }}
                 className="w-36 rounded-md border border-border bg-bg-card px-3 py-2 text-right text-sm text-text focus:border-savings/40 focus:outline-none"
               />
@@ -93,7 +99,7 @@ export default function SavingsCalculator() {
         <div className="rounded-lg border border-border bg-bg px-4 py-4 text-sm text-text-secondary">
           You send about{' '}
           <span className="font-semibold text-text">
-            {integerFormatter.format(tokensPerDay)} tokens/day
+            {integerFormatter.format(safeTokensPerDay)} tokens/day
           </span>
           {' '}and save about{' '}
           <span className="font-semibold text-savings">
@@ -103,7 +109,7 @@ export default function SavingsCalculator() {
           <span className="font-semibold text-savings">
             {currencyFormatter.format(monthlySavings)}/month
           </span>
-          {' '}in API costs.
+          {' '}on your upstream LLM bill (GPT-4o pricing).
         </div>
 
         <div className="grid gap-4 md:grid-cols-3">
