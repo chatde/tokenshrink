@@ -165,7 +165,7 @@ function DashboardContent() {
           <div>
             <p className="text-sm font-semibold text-text">Unlock the Enigma Machine</p>
             <p className="text-xs text-text-secondary mt-0.5">
-              Rosetta Protocol · Domain rotors · Cross-session learning · $9/month
+              Rosetta Protocol · Domain rotors · Cross-session learning · $5/month
             </p>
           </div>
           <button

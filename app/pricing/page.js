@@ -99,10 +99,10 @@ export default function PricingPage() {
                 <div className="text-xs font-medium text-savings mb-3 uppercase tracking-wider">Advanced</div>
                 <h3 className="text-lg font-semibold text-text">TokenShrink Advanced</h3>
                 <div className="mt-3 flex items-baseline gap-1">
-                  <span className="text-5xl font-bold text-text">$9</span>
+                  <span className="text-5xl font-bold text-text">$5</span>
                   <span className="text-sm text-text-muted">/ month</span>
                 </div>
-                <p className="text-xs text-text-muted mt-2">$79/year — save 27%</p>
+                <p className="text-xs text-text-muted mt-2">$36/year — save 40%</p>
               </div>
 
               <ul className="mt-8 space-y-3 flex-1">
