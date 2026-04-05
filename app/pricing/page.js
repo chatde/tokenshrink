@@ -102,7 +102,7 @@ export default function PricingPage() {
                   <span className="text-5xl font-bold text-text">$5</span>
                   <span className="text-sm text-text-muted">/ month</span>
                 </div>
-                <p className="text-xs text-text-muted mt-2">$36/year — save 40%</p>
+                <p className="text-sm font-medium text-savings mt-2">$36/year — save 40% <span className="text-xs font-normal text-text-secondary">($3/mo)</span></p>
               </div>
 
               <ul className="mt-8 space-y-3 flex-1">
