@@ -1,6 +1,7 @@
 import Navbar from '../components/Navbar';
 import Link from 'next/link';
 import UpgradeButton from './UpgradeButton';
+import SavingsCalculator from './SavingsCalculator';
 
 export const metadata = {
   title: 'Pricing — TokenShrink',
@@ -55,6 +56,8 @@ export default function PricingPage() {
               Free forever for phrase compression. Advanced unlocks the Enigma machine.
             </p>
           </div>
+
+          <SavingsCalculator />
 
           <div className="max-w-3xl mx-auto grid md:grid-cols-2 gap-6">
 
