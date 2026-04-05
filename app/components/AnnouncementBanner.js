@@ -11,7 +11,7 @@ const MESSAGE = [
   '—',
   'Works with Claude · Gemini · GPT · Ollama',
   '—',
-  '100% semantic accuracy guaranteed',
+  'Zero meaning loss — 51 tests passing',
   '—',
 ].join('   ');
 
