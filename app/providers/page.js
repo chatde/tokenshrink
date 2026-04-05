@@ -125,7 +125,7 @@ export default function ProvidersPage() {
   return (
     <>
       <Navbar />
-      <main className="pt-14">
+      <main className="pt-[88px]">
         <section className="max-w-5xl mx-auto px-6 py-16">
           <div className="text-center mb-12">
             <h1 className="text-3xl md:text-4xl font-bold text-text">

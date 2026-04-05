@@ -343,7 +343,7 @@ export default function DashboardPage() {
   return (
     <>
       <Navbar />
-      <main className="pt-14 px-6">
+      <main className="pt-[88px] px-6">
         <Suspense fallback={
           <div className="max-w-4xl mx-auto py-20 text-center text-text-muted">
             Loading...

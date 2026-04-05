@@ -93,7 +93,7 @@ export default function IntegrationsPage() {
   return (
     <>
       <Navbar />
-      <main className="pt-14 px-6">
+      <main className="pt-[88px] px-6">
         <div className="max-w-3xl mx-auto py-12">
 
           {/* Hero */}

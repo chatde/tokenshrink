@@ -15,7 +15,7 @@ export default function Home() {
     <>
       <Navbar />
 
-      <main className="pt-14">
+      <main className="pt-[88px]">
         {/* Hero — the demo IS the product */}
         <section className="px-6 pt-20 pb-16 relative">
           {/* Data stream animation */}

@@ -47,7 +47,7 @@ export default function PricingPage() {
   return (
     <>
       <Navbar />
-      <main className="pt-14">
+      <main className="pt-[88px]">
         <section className="px-6 py-20">
           <div className="text-center mb-12">
             <h1 className="text-3xl font-bold text-text">Simple pricing</h1>

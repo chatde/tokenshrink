@@ -9,7 +9,7 @@ export default function DocsPage() {
   return (
     <>
       <Navbar />
-      <main className="pt-14 px-6">
+      <main className="pt-[88px] px-6">
         <div className="max-w-3xl mx-auto py-12">
           <h1 className="text-3xl font-bold text-text mb-2">API Documentation</h1>
           <p className="text-text-secondary mb-10">
