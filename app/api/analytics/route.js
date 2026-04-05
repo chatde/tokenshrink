@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { sql } from 'drizzle-orm';
 import { db } from '@/app/lib/db';
+import { checkRateLimit, rateLimitResponse } from '@/app/lib/rate-limit';
 
 const CORS_HEADERS = {
   'Access-Control-Allow-Origin': '*',
@@ -16,6 +17,15 @@ const MAX_STRING_LEN = 64;
 
 export async function POST(request) {
   try {
+    // Rate limit by IP — 120 requests per minute (telemetry is high-frequency)
+    const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim()
+      || request.headers.get('x-real-ip')
+      || 'unknown';
+    const { allowed, retryAfter } = await checkRateLimit(`analytics:${ip}`, { limit: 120, windowMs: 60_000 });
+    if (!allowed) {
+      return rateLimitResponse(retryAfter);
+    }
+
     let body = {};
     try {
       body = await request.json();

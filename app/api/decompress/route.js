@@ -1,7 +1,17 @@
 import { NextResponse } from 'next/server';
+import { checkRateLimit, rateLimitResponse } from '@/app/lib/rate-limit';
 
 export async function POST(request) {
   try {
+    // Rate limit by IP — 60 requests per minute
+    const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim()
+      || request.headers.get('x-real-ip')
+      || 'unknown';
+    const { allowed, retryAfter } = await checkRateLimit(`decompress:${ip}`, { limit: 60, windowMs: 60_000 });
+    if (!allowed) {
+      return rateLimitResponse(retryAfter);
+    }
+
     const { text } = await request.json();
     if (!text || typeof text !== 'string') {
       return NextResponse.json({ error: 'Text is required' }, { status: 400 });

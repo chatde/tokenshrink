@@ -31,6 +31,12 @@ export default function Navbar() {
             Integrations
           </Link>
           <Link
+            href="/pricing"
+            className="text-sm text-text-secondary hover:text-text transition-colors"
+          >
+            Pricing
+          </Link>
+          <Link
             href="/docs"
             className="text-sm text-text-secondary hover:text-text transition-colors"
           >

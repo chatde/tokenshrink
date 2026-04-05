@@ -163,7 +163,7 @@ const res = await openai.chat.completions.create({
                 </div>
                 <div className="flex justify-between">
                   <span>Monthly limit</span>
-                  <span className="text-text font-medium">Unlimited</span>
+                  <span className="text-text font-medium">500 calls/month on Free, unlimited on Advanced</span>
                 </div>
                 <div className="flex justify-between">
                   <span>Price</span>

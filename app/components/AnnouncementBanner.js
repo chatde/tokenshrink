@@ -7,7 +7,7 @@ const MESSAGE = [
   '—',
   'Huffman frequency compression',
   '—',
-  'Pro tier now available',
+  'Advanced tier now available',
   '—',
   'Works with Claude · Gemini · GPT · Ollama',
   '—',

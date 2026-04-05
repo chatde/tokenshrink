@@ -62,7 +62,7 @@ export async function POST(request) {
     // Rate limit — authenticated users get 30/min, anonymous get 10/min
     const rateKey = userId ? `user:${userId}` : `ip:${ip}`;
     const rateOptions = userId ? { limit: 30, windowMs: 60_000 } : { limit: 10, windowMs: 60_000 };
-    const { allowed, remaining, retryAfter } = checkRateLimit(rateKey, rateOptions);
+    const { allowed, remaining, retryAfter } = await checkRateLimit(rateKey, rateOptions);
 
     if (!allowed) {
       return rateLimitResponse(retryAfter, { 'X-RateLimit-Limit': String(rateOptions.limit) });

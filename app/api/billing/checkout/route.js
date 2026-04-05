@@ -1,3 +1,4 @@
+import { checkRateLimit, rateLimitResponse } from '@/app/lib/rate-limit';
 import { NextResponse } from 'next/server';
 import { auth } from '@/app/lib/auth';
 import { db } from '@/app/lib/db';
@@ -10,6 +11,13 @@ const PRICE_MAP = {
 };
 
 export async function POST(request) {
+  const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 'unknown';
+  const rl = await checkRateLimit(ip, { limit: 30, windowMs: 60_000 });
+  if (!rl.allowed) return rateLimitResponse(rl.retryAfter);
+  const stripe = getStripe();
+  if (!stripe) {
+    return NextResponse.json({ error: 'Billing unavailable' }, { status: 503 });
+  }
   const session = await auth();
   if (!session?.user?.id) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -35,7 +43,7 @@ export async function POST(request) {
 
   // Create Stripe customer if needed
   if (!customerId) {
-    const customer = await getStripe().customers.create({
+    const customer = await stripe.customers.create({
       email: session.user.email,
       name: session.user.name,
       metadata: { userId: session.user.id },
@@ -48,7 +56,7 @@ export async function POST(request) {
       .where(eq(users.id, session.user.id));
   }
 
-  const checkoutSession = await getStripe().checkout.sessions.create({
+  const checkoutSession = await stripe.checkout.sessions.create({
     customer: customerId,
     mode: 'subscription',
     line_items: [{ price: priceId, quantity: 1 }],

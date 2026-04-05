@@ -2,8 +2,13 @@
 
 import { signIn } from 'next-auth/react';
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 
 export default function LoginPage() {
+  const searchParams = useSearchParams();
+  const next = searchParams.get('next');
+  const callbackUrl = next?.startsWith('/') ? next : '/dashboard';
+
   return (
     <div className="min-h-screen flex items-center justify-center px-6">
       <div className="w-full max-w-sm">
@@ -20,7 +25,7 @@ export default function LoginPage() {
 
           <div className="space-y-3">
             <button
-              onClick={() => signIn('github', { callbackUrl: '/dashboard' })}
+              onClick={() => signIn('github', { callbackUrl })}
               className="w-full flex items-center justify-center gap-3 px-4 py-2.5 bg-white text-[#0a0a0a] rounded-lg font-medium text-sm hover:bg-white/90 transition-colors"
             >
               <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
@@ -30,7 +35,7 @@ export default function LoginPage() {
             </button>
 
             <button
-              onClick={() => signIn('google', { callbackUrl: '/dashboard' })}
+              onClick={() => signIn('google', { callbackUrl })}
               className="w-full flex items-center justify-center gap-3 px-4 py-2.5 bg-white text-[#0a0a0a] rounded-lg font-medium text-sm hover:bg-white/90 transition-colors"
             >
               <svg className="w-5 h-5" viewBox="0 0 24 24">
@@ -49,7 +54,7 @@ export default function LoginPage() {
         </div>
 
         <p className="text-xs text-text-muted text-center mt-4">
-          Free account includes 5,000 words/month
+          Free account includes 500 API calls/month
         </p>
       </div>
     </div>

@@ -4,8 +4,18 @@ import { db } from '@/app/lib/db';
 import { usageMeters, compressions } from '@/schema/schema';
 import { eq, desc } from 'drizzle-orm';
 import { getPlan, getCurrentPeriod } from '@/app/lib/billing';
+import { checkRateLimit, rateLimitResponse } from '@/app/lib/rate-limit';
 
-export async function GET() {
+export async function GET(request) {
+  // Rate limit by IP — 30 requests per minute
+  const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim()
+    || request.headers.get('x-real-ip')
+    || 'unknown';
+  const { allowed, retryAfter } = await checkRateLimit(`usage:${ip}`, { limit: 30, windowMs: 60_000 });
+  if (!allowed) {
+    return rateLimitResponse(retryAfter);
+  }
+
   const session = await auth();
   if (!session?.user?.id) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });

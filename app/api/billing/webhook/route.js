@@ -5,12 +5,17 @@ import { eq } from 'drizzle-orm';
 import { getStripe } from '@/app/lib/stripe';
 
 export async function POST(request) {
+  const stripe = getStripe();
+  if (!stripe) {
+    return NextResponse.json({ error: 'Billing unavailable' }, { status: 503 });
+  }
+
   const body = await request.text();
   const sig = request.headers.get('stripe-signature');
 
   let event;
   try {
-    event = getStripe().webhooks.constructEvent(body, sig, process.env.STRIPE_WEBHOOK_SECRET);
+    event = stripe.webhooks.constructEvent(body, sig, process.env.STRIPE_WEBHOOK_SECRET);
   } catch (err) {
     console.error('Webhook signature verification failed:', err.message);
     return NextResponse.json({ error: 'Invalid signature' }, { status: 400 });
@@ -25,11 +30,11 @@ export async function POST(request) {
         await db
           .update(users)
           .set({ plan, updatedAt: new Date() })
-          .where(eq(users.id, userId));
+        .where(eq(users.id, userId));
 
         // Store subscription
         if (session.subscription) {
-          const sub = await getStripe().subscriptions.retrieve(session.subscription);
+          const sub = await stripe.subscriptions.retrieve(session.subscription);
           await db
             .insert(subscriptions)
             .values({

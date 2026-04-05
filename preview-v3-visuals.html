@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TokenShrink — Visual Upgrade Preview</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=JetBrains+Mono:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #080808;
+    --bg-secondary: #111111;
+    --bg-card: #161616;
+    --border: #1e1e1e;
+    --border-hover: #333;
+    --savings: #00d17d;
+    --savings-dim: rgba(0, 209, 125, 0.08);
+    --cost: #ef4444;
+    --cost-dim: rgba(239, 68, 68, 0.08);
+    --text: #f0f0f0;
+    --text-secondary: #999;
+    --text-muted: #5a5a5a;
+    --glow: 0 0 60px rgba(0, 209, 125, 0.12);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Space Mono', monospace;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+  }
+
+  ::selection {
+    background: rgba(0, 209, 125, 0.2);
+    color: inherit;
+  }
+
+  /* ── Navbar ──────────────────────────────── */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    border-bottom: 1px solid var(--border);
+    background: rgba(8, 8, 8, 0.85);
+    backdrop-filter: blur(20px) saturate(1.4);
+  }
+  .nav-inner {
+    max-width: 1100px; margin: 0 auto; padding: 0 24px;
+    height: 56px; display: flex; align-items: center; justify-content: space-between;
+  }
+  .logo { font-size: 18px; font-weight: 700; text-decoration: none; color: var(--text); letter-spacing: -0.02em; }
+  .logo span { color: var(--savings); }
+  .nav-links { display: flex; align-items: center; gap: 28px; }
+  .nav-links a { font-size: 13px; color: var(--text-secondary); text-decoration: none; transition: color 0.2s; }
+  .nav-links a:hover { color: var(--text); }
+  .nav-cta {
+    font-size: 13px; font-weight: 600; padding: 6px 16px; border-radius: 8px;
+    background: var(--savings); color: var(--bg); text-decoration: none; transition: all 0.2s;
+  }
+  .nav-cta:hover { background: #00c072; }
+
+  /* ── Hero ─────────────────────────────────── */
+  .hero {
+    padding: 140px 24px 80px; text-align: center;
+    position: relative; overflow: hidden;
+  }
+  .hero::before {
+    content: ''; position: absolute; top: -100px; left: 50%; transform: translateX(-50%);
+    width: 600px; height: 400px;
+    background: radial-gradient(ellipse, rgba(0,209,125,0.06) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .data-line {
+    position: absolute; height: 1px; width: 180px;
+    background: linear-gradient(90deg, transparent, var(--savings), transparent);
+    opacity: 0.3; pointer-events: none;
+  }
+  .data-line:nth-child(1) { top: 18%; animation: stream 7s linear infinite; }
+  .data-line:nth-child(2) { top: 40%; animation: stream 9s linear 2.5s infinite; }
+  .data-line:nth-child(3) { top: 65%; animation: stream 6s linear 5s infinite; }
+  @keyframes stream {
+    0% { transform: translateX(-200px); opacity: 0; }
+    10% { opacity: 0.4; } 90% { opacity: 0.4; }
+    100% { transform: translateX(100vw); opacity: 0; }
+  }
+  .hero-label {
+    font-size: 11px; letter-spacing: 0.3em; text-transform: uppercase;
+    color: rgba(0, 209, 125, 0.5); margin-bottom: 20px;
+    animation: fadeUp 0.6s ease-out;
+  }
+  .mascot-wrap {
+    display: flex; justify-content: center; margin-bottom: 20px;
+    animation: fadeUp 0.65s ease-out 0.05s both;
+  }
+  .mascot-wrap svg { filter: drop-shadow(0 0 20px rgba(0, 209, 125, 0.2)); }
+  @keyframes bounce-slow {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-8px); }
+  }
+  .bounce-slow { animation: bounce-slow 3s ease-in-out infinite; }
+  /* Shrink ray beam animation */
+  @keyframes ray-pulse {
+    0%, 100% { opacity: 0.3; r: 2; }
+    50% { opacity: 0.9; r: 5; }
+  }
+  .ray-tip-glow { animation: ray-pulse 1.5s ease-in-out infinite; }
+  @keyframes ray-beam {
+    0% { opacity: 0; stroke-dashoffset: 30; }
+    50% { opacity: 0.6; }
+    100% { opacity: 0; stroke-dashoffset: 0; }
+  }
+  .ray-beam { animation: ray-beam 2s ease-out infinite; stroke-dasharray: 8 4; }
+  .hero h1 {
+    font-size: clamp(36px, 5vw, 52px); font-weight: 700;
+    line-height: 1.15; letter-spacing: -0.03em; margin-bottom: 16px;
+    animation: fadeUp 0.7s ease-out 0.1s both;
+  }
+  .hero h1 .green { color: var(--savings); }
+  .hero h1 .cursor {
+    display: inline-block; width: 2px; height: 0.85em;
+    background: var(--savings); margin-left: 2px; vertical-align: middle;
+    animation: blink 1s step-end infinite;
+  }
+  .hero-sub {
+    font-size: 15px; color: var(--text-secondary); max-width: 520px;
+    margin: 0 auto 40px; line-height: 1.7;
+    animation: fadeUp 0.8s ease-out 0.2s both;
+    font-family: 'JetBrains Mono', monospace; font-weight: 300;
+  }
+  @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+
+  /* ── Widget ──────────────────────────────── */
+  .widget { max-width: 900px; margin: 0 auto; animation: fadeUp 0.9s ease-out 0.3s both; }
+  .widget textarea {
+    width: 100%; height: 180px; padding: 20px;
+    background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px;
+    color: var(--text); font-family: 'JetBrains Mono', monospace;
+    font-size: 13px; font-weight: 400; resize: none; outline: none;
+    transition: border-color 0.3s, box-shadow 0.3s;
+  }
+  .widget textarea::placeholder { color: var(--text-muted); }
+  .widget textarea:focus {
+    border-color: rgba(0, 209, 125, 0.4);
+    box-shadow: 0 0 0 3px rgba(0, 209, 125, 0.06), var(--glow);
+  }
+  .widget-input { position: relative; }
+  .widget-hint { position: absolute; bottom: 10px; right: 16px; font-size: 11px; color: var(--text-muted); }
+  .widget-actions { display: flex; align-items: center; gap: 12px; margin-top: 14px; }
+
+  .btn-shrink {
+    padding: 12px 32px; background: var(--savings); color: var(--bg);
+    font-family: 'Space Mono', monospace; font-size: 13px; font-weight: 700;
+    border: none; border-radius: 10px; cursor: pointer; transition: all 0.2s;
+  }
+  .btn-shrink:hover { background: #00c072; transform: translateY(-1px); box-shadow: 0 4px 20px rgba(0, 209, 125, 0.25); }
+  .btn-sample {
+    padding: 12px 20px; background: transparent; color: var(--text-secondary);
+    font-family: 'Space Mono', monospace; font-size: 13px;
+    border: 1px solid var(--border); border-radius: 10px; cursor: pointer; transition: all 0.2s;
+  }
+  .btn-sample:hover { border-color: var(--border-hover); color: var(--text); }
+
+  /* ── Results ─────────────────────────────── */
+  .results { margin-top: 40px; display: none; }
+  .results.active { display: block; animation: fadeUp 0.5s ease-out; }
+  .savings-banner { text-align: center; margin-bottom: 28px; }
+  .savings-banner .big { font-size: 32px; font-weight: 700; color: var(--savings); }
+  .savings-banner .detail { font-size: 13px; color: var(--text-muted); margin-top: 4px; font-family: 'JetBrains Mono', monospace; }
+
+  .split-view { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .split-panel { border-radius: 12px; overflow: hidden; border: 1px solid; }
+  .split-panel.original { border-color: rgba(239, 68, 68, 0.15); }
+  .split-panel.compressed { border-color: rgba(0, 209, 125, 0.15); }
+  .split-header {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 10px 16px; border-bottom: 1px solid var(--border); font-size: 12px; font-weight: 600;
+  }
+  .original .split-header { background: var(--cost-dim); color: var(--cost); }
+  .compressed .split-header { background: var(--savings-dim); color: var(--savings); }
+  .split-header .tokens { opacity: 0.6; font-weight: 400; }
+  .split-body { padding: 16px; max-height: 250px; overflow-y: auto; background: var(--bg-card); }
+  .split-body pre {
+    font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 300;
+    color: var(--text-secondary); white-space: pre-wrap; word-break: break-word; line-height: 1.6;
+  }
+
+  /* Diff highlighting via DOM elements */
+  .diff-removed {
+    background: rgba(239, 68, 68, 0.12); color: rgba(239, 68, 68, 0.7);
+    text-decoration: line-through; text-decoration-color: rgba(239, 68, 68, 0.3);
+    border-radius: 2px; padding: 0 2px;
+  }
+  .diff-added {
+    background: rgba(0, 209, 125, 0.12); color: var(--savings);
+    border-radius: 2px; padding: 0 2px; font-weight: 500;
+  }
+
+  .btn-copy {
+    display: block; margin: 16px auto 0; padding: 10px 24px;
+    font-family: 'Space Mono', monospace; font-size: 13px; color: var(--savings);
+    background: transparent; border: 1px solid rgba(0, 209, 125, 0.25);
+    border-radius: 10px; cursor: pointer; transition: all 0.2s;
+  }
+  .btn-copy:hover { background: rgba(0, 209, 125, 0.06); }
+
+  .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 20px; }
+  .stat-pill { text-align: center; padding: 12px; background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px; }
+  .stat-pill .label { font-size: 11px; color: var(--text-muted); }
+  .stat-pill .value { font-size: 14px; font-weight: 600; color: var(--text); margin-top: 4px; font-family: 'JetBrains Mono', monospace; }
+
+  /* ── Works With Logos ──────────────────── */
+  .logos-section { padding: 60px 24px; border-top: 1px solid var(--border); background: var(--bg-secondary); }
+  .logos-inner { max-width: 900px; margin: 0 auto; text-align: center; }
+  .logos-label { font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 28px; }
+  .logos-grid { display: flex; justify-content: center; align-items: center; gap: 48px; flex-wrap: wrap; }
+  .logo-item { display: flex; flex-direction: column; align-items: center; gap: 8px; opacity: 0.4; transition: opacity 0.3s; }
+  .logo-item:hover { opacity: 0.8; }
+  .logo-item .licon { font-size: 28px; line-height: 1; }
+  .logo-item .name { font-size: 11px; color: var(--text-muted); font-family: 'JetBrains Mono', monospace; }
+
+  /* ── Stats Cards ─────────────────────────── */
+  .stats-section { padding: 60px 24px; border-top: 1px solid var(--border); background: var(--bg-secondary); }
+  .stats-grid { max-width: 900px; margin: 0 auto; display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+  .stat-card {
+    border: 1px solid rgba(0, 209, 125, 0.1); border-radius: 14px;
+    padding: 24px; text-align: center; background: var(--bg-card);
+    position: relative; overflow: hidden; transition: border-color 0.3s, transform 0.2s;
+  }
+  .stat-card:hover { border-color: rgba(0, 209, 125, 0.25); transform: translateY(-2px); }
+  .stat-card::after {
+    content: ''; position: absolute; inset: 0;
+    background: radial-gradient(circle at var(--mx, 50%) var(--my, 50%), rgba(0, 209, 125, 0.04), transparent 60%);
+    pointer-events: none;
+  }
+  .stat-card .icon { font-size: 16px; color: rgba(0, 209, 125, 0.35); margin-bottom: 10px; font-family: 'JetBrains Mono', monospace; }
+  .stat-card .num { font-size: 26px; font-weight: 700; color: var(--savings); font-family: 'JetBrains Mono', monospace; }
+  .stat-card .desc { font-size: 11px; color: var(--text-muted); margin-top: 4px; }
+
+  /* ── How It Works ────────────────────────── */
+  .how-section { padding: 80px 24px; border-top: 1px solid var(--border); }
+  .how-inner { max-width: 900px; margin: 0 auto; }
+  .section-heading { display: flex; align-items: center; gap: 16px; margin-bottom: 48px; }
+  .section-heading .line { flex: 1; height: 1px; background: var(--border); }
+  .section-heading h2 { font-size: 18px; font-weight: 600; color: var(--text-secondary); white-space: nowrap; }
+  .steps-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+  .step-card {
+    background: var(--bg-card); border: 1px solid var(--border); border-radius: 14px;
+    padding: 28px; transition: border-color 0.3s, transform 0.2s;
+    position: relative; overflow: hidden;
+  }
+  .step-card:hover { border-color: var(--border-hover); transform: translateY(-2px); }
+  .step-card::after {
+    content: ''; position: absolute; inset: 0;
+    background: radial-gradient(circle at var(--mx, 50%) var(--my, 50%), rgba(0, 209, 125, 0.03), transparent 50%);
+    pointer-events: none;
+  }
+  .step-num { font-size: 32px; font-weight: 700; color: rgba(0, 209, 125, 0.12); margin-bottom: 12px; font-family: 'JetBrains Mono', monospace; }
+  .step-card h3 { font-size: 15px; font-weight: 600; color: var(--text); margin-bottom: 8px; }
+  .step-card p { font-size: 13px; color: var(--text-secondary); line-height: 1.6; font-family: 'JetBrains Mono', monospace; font-weight: 300; }
+
+  /* ── SDK Section ─────────────────────────── */
+  .sdk-section { padding: 80px 24px; border-top: 1px solid var(--border); }
+  .sdk-inner { max-width: 720px; margin: 0 auto; }
+  .sdk-desc { text-align: center; font-size: 14px; color: var(--text-secondary); margin-bottom: 28px; font-family: 'JetBrains Mono', monospace; font-weight: 300; }
+  .code-block { background: var(--bg-card); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; }
+  .code-header { display: flex; align-items: center; gap: 8px; padding: 10px 16px; border-bottom: 1px solid var(--border); }
+  .dot { width: 10px; height: 10px; border-radius: 50%; }
+  .dot.r { background: rgba(239,68,68,0.5); }
+  .dot.y { background: rgba(234,179,8,0.5); }
+  .dot.g { background: rgba(0,209,125,0.5); }
+  .code-header .filename { margin-left: 8px; font-size: 12px; color: var(--text-muted); }
+  .code-body { padding: 20px; overflow-x: auto; }
+  .code-body pre { font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 400; color: var(--text-secondary); line-height: 1.7; }
+  .code-body .kw { color: #c792ea; }
+  .code-body .fn { color: #82aaff; }
+  .code-body .str { color: #c3e88d; }
+  .code-body .cm { color: #546e7a; }
+  .npm-install {
+    display: inline-block; text-align: center; margin-top: 20px;
+    font-size: 13px; color: var(--text-muted); padding: 8px 16px;
+    background: var(--bg-card); border: 1px solid var(--border); border-radius: 8px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  /* ── CTA ──────────────────────────────────── */
+  .cta-section { padding: 80px 24px; border-top: 1px solid var(--border); background: var(--bg-secondary); text-align: center; }
+  .cta-section h2 { font-size: 32px; font-weight: 700; margin-bottom: 12px; letter-spacing: -0.02em; }
+  .cta-section .green { color: var(--savings); }
+  .cta-section p { color: var(--text-secondary); margin-bottom: 24px; font-family: 'JetBrains Mono', monospace; font-weight: 300; }
+  .cta-btn {
+    display: inline-block; padding: 14px 36px; background: var(--savings); color: var(--bg);
+    font-family: 'Space Mono', monospace; font-size: 14px; font-weight: 700;
+    text-decoration: none; border-radius: 10px; transition: all 0.2s;
+  }
+  .cta-btn:hover { background: #00c072; transform: translateY(-1px); box-shadow: 0 4px 24px rgba(0, 209, 125, 0.3); }
+
+  /* ── Footer ──────────────────────────────── */
+  footer { padding: 40px 24px; border-top: 1px solid var(--border); }
+  .footer-inner { max-width: 1100px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; }
+  .footer-left { font-size: 13px; color: var(--text-muted); }
+  .footer-left .g { color: var(--savings); }
+  .footer-links { display: flex; gap: 20px; }
+  .footer-links a { font-size: 12px; color: var(--text-muted); text-decoration: none; transition: color 0.2s; }
+  .footer-links a:hover { color: var(--text); }
+
+  /* ── Preview Banner ──────────────────────── */
+  .preview-banner {
+    position: fixed; bottom: 0; left: 0; right: 0; z-index: 200;
+    background: linear-gradient(135deg, #111, #1a1a2e); border-top: 1px solid var(--savings);
+    padding: 12px 24px; text-align: center; font-size: 13px; color: var(--savings);
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .preview-banner strong { color: var(--text); }
+
+  ::-webkit-scrollbar { width: 5px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+  @media (max-width: 768px) {
+    .split-view, .stats-row { grid-template-columns: 1fr; }
+    .stats-grid { grid-template-columns: repeat(2, 1fr); }
+    .steps-grid { grid-template-columns: 1fr; }
+    .logos-grid { gap: 28px; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-inner">
+    <a href="#" class="logo">Token<span>Shrink</span></a>
+    <div class="nav-links">
+      <a href="#">Providers</a>
+      <a href="#">Integrations</a>
+      <a href="#">Docs</a>
+      <a href="#">Pricing</a>
+      <a href="#" class="nav-cta">Sign in</a>
+    </div>
+  </div>
+</nav>
+
+<section class="hero">
+  <div class="data-line"></div>
+  <div class="data-line"></div>
+  <div class="data-line"></div>
+  <p class="hero-label">Token Compression Engine</p>
+
+  <!-- Shrinkray Mascot -->
+  <div class="mascot-wrap">
+    <svg class="bounce-slow" width="100" height="100" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="Shrinkray mascot">
+      <!-- Body -->
+      <ellipse cx="55" cy="72" rx="18" ry="22" fill="#10b981"/>
+      <ellipse cx="55" cy="72" rx="15" ry="19" fill="#34d399"/>
+      <!-- Head -->
+      <circle cx="55" cy="42" r="24" fill="#10b981"/>
+      <circle cx="55" cy="42" r="21" fill="#34d399"/>
+      <circle cx="55" cy="42" r="18" fill="#10b981"/>
+      <!-- Antenna -->
+      <line x1="55" y1="18" x2="55" y2="10" stroke="#059669" stroke-width="2" stroke-linecap="round"/>
+      <circle cx="55" cy="8" r="3" fill="#6ee7b7"/>
+      <!-- Eyes -->
+      <ellipse cx="46" cy="38" rx="6" ry="7" fill="white"/>
+      <ellipse cx="64" cy="38" rx="6" ry="7" fill="white"/>
+      <circle cx="48" cy="37" r="3" fill="#1e293b"/>
+      <circle cx="66" cy="37" r="3" fill="#1e293b"/>
+      <circle cx="49.5" cy="35.5" r="1.5" fill="white"/>
+      <circle cx="67.5" cy="35.5" r="1.5" fill="white"/>
+      <!-- Grin -->
+      <path d="M 44 50 Q 55 58 66 50" stroke="white" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+      <!-- Cheeks -->
+      <ellipse cx="38" cy="46" rx="4" ry="2.5" fill="#6ee7b7" opacity="0.5"/>
+      <ellipse cx="72" cy="46" rx="4" ry="2.5" fill="#6ee7b7" opacity="0.5"/>
+      <!-- Shrink ray gun -->
+      <rect x="78" y="48" width="28" height="12" rx="3" fill="#64748b"/>
+      <rect x="80" y="50" width="24" height="8" rx="2" fill="#94a3b8"/>
+      <rect x="106" y="50" width="10" height="8" rx="2" fill="#475569"/>
+      <!-- Gun tip with animated glow -->
+      <circle cx="118" cy="54" r="4" fill="#10b981"/>
+      <circle cx="118" cy="54" r="2" fill="#6ee7b7" class="ray-tip-glow"/>
+      <!-- Ray beam shooting out -->
+      <line x1="122" y1="54" x2="138" y2="54" stroke="#6ee7b7" stroke-width="1.5" class="ray-beam"/>
+      <line x1="122" y1="52" x2="135" y2="48" stroke="#6ee7b7" stroke-width="1" class="ray-beam" style="animation-delay: 0.3s"/>
+      <line x1="122" y1="56" x2="135" y2="60" stroke="#6ee7b7" stroke-width="1" class="ray-beam" style="animation-delay: 0.6s"/>
+      <!-- Gun handle -->
+      <rect x="84" y="60" width="8" height="14" rx="2" fill="#475569"/>
+      <!-- Energy lines on gun -->
+      <line x1="92" y1="52" x2="104" y2="52" stroke="#10b981" stroke-width="1" opacity="0.6"/>
+      <line x1="92" y1="56" x2="104" y2="56" stroke="#10b981" stroke-width="1" opacity="0.6"/>
+      <!-- Arms -->
+      <path d="M 70 62 Q 76 58 82 54" stroke="#059669" stroke-width="4" stroke-linecap="round" fill="none"/>
+      <path d="M 38 62 Q 30 55 25 48" stroke="#059669" stroke-width="4" stroke-linecap="round" fill="none"/>
+      <!-- Legs -->
+      <rect x="46" y="90" width="6" height="10" rx="3" fill="#059669"/>
+      <rect x="57" y="90" width="6" height="10" rx="3" fill="#059669"/>
+      <ellipse cx="49" cy="101" rx="5" ry="3" fill="#059669"/>
+      <ellipse cx="60" cy="101" rx="5" ry="3" fill="#059669"/>
+      <!-- Body circuits -->
+      <line x1="48" y1="68" x2="48" y2="76" stroke="#059669" stroke-width="1" opacity="0.4"/>
+      <line x1="55" y1="66" x2="55" y2="80" stroke="#059669" stroke-width="1" opacity="0.4"/>
+      <line x1="62" y1="68" x2="62" y2="76" stroke="#059669" stroke-width="1" opacity="0.4"/>
+    </svg>
+  </div>
+
+  <h1>> Same AI, fewer tokens.<br><span class="green">Ship smarter.<span class="cursor"></span></span></h1>
+  <p class="hero-sub">Your prompts are verbose. Your models don't need them to be.<br>TokenShrink compresses prompts — same results, fewer tokens. Open source.</p>
+
+  <div class="widget">
+    <div class="widget-input">
+      <textarea id="input" placeholder="Paste your prompt, system message, or any text..."></textarea>
+      <div class="widget-hint">Cmd+Enter to shrink</div>
+    </div>
+    <div class="widget-actions">
+      <button class="btn-shrink" onclick="runDemo()">Shrink</button>
+      <button class="btn-sample" onclick="loadSample()">Try a sample prompt</button>
+    </div>
+    <div class="results" id="results">
+      <div class="savings-banner">
+        <div class="big" id="saved-count">0 tokens saved</div>
+        <div class="detail" id="saved-detail"></div>
+      </div>
+      <div class="split-view">
+        <div class="split-panel original">
+          <div class="split-header"><span>Original</span><span class="tokens" id="orig-tokens"></span></div>
+          <div class="split-body"><pre id="original-text"></pre></div>
+        </div>
+        <div class="split-panel compressed">
+          <div class="split-header"><span>Compressed</span><span class="tokens" id="comp-tokens"></span></div>
+          <div class="split-body"><pre id="compressed-text"></pre></div>
+        </div>
+      </div>
+      <button class="btn-copy">Copy compressed text</button>
+      <div class="stats-row">
+        <div class="stat-pill"><div class="label">Strategy</div><div class="value">auto</div></div>
+        <div class="stat-pill"><div class="label">Replacements</div><div class="value" id="repl-count">0</div></div>
+        <div class="stat-pill"><div class="label">Patterns</div><div class="value">3</div></div>
+        <div class="stat-pill"><div class="label">Tokenizer</div><div class="value">cl100k</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="logos-section">
+  <div class="logos-inner">
+    <p class="logos-label">Works with every LLM provider</p>
+    <div class="logos-grid">
+      <div class="logo-item"><div class="licon">&#9678;</div><span class="name">OpenAI</span></div>
+      <div class="logo-item"><div class="licon">&#9670;</div><span class="name">Anthropic</span></div>
+      <div class="logo-item"><div class="licon">&#9651;</div><span class="name">Google AI</span></div>
+      <div class="logo-item"><div class="licon">&#10022;</div><span class="name">Mistral</span></div>
+      <div class="logo-item"><div class="licon">&#8857;</div><span class="name">Ollama</span></div>
+      <div class="logo-item"><div class="licon">&#9633;</div><span class="name">Any LLM</span></div>
+    </div>
+  </div>
+</section>
+
+<section class="stats-section">
+  <div class="stats-grid">
+    <div class="stat-card" onmousemove="trackMouse(event, this)">
+      <div class="icon">$</div><div class="num" id="live-counter">12,847</div><div class="desc">Tokens saved globally</div>
+    </div>
+    <div class="stat-card" onmousemove="trackMouse(event, this)">
+      <div class="icon">&#9674;</div><div class="num">100%</div><div class="desc">Open source</div>
+    </div>
+    <div class="stat-card" onmousemove="trackMouse(event, this)">
+      <div class="icon">&#9678;</div><div class="num">&lt; 200ms</div><div class="desc">Processing time</div>
+    </div>
+    <div class="stat-card" onmousemove="trackMouse(event, this)">
+      <div class="icon">&#10022;</div><div class="num">All LLMs</div><div class="desc">Compatible</div>
+    </div>
+  </div>
+</section>
+
+<section class="how-section">
+  <div class="how-inner">
+    <div class="section-heading"><div class="line"></div><h2>How It Works</h2><div class="line"></div></div>
+    <div class="steps-grid">
+      <div class="step-card" onmousemove="trackMouse(event, this)">
+        <div class="step-num">01</div><h3>Paste your prompt</h3>
+        <p>System messages, user prompts, documents — anything you send to an LLM.</p>
+      </div>
+      <div class="step-card" onmousemove="trackMouse(event, this)">
+        <div class="step-num">02</div><h3>We compress it</h3>
+        <p>Our engine replaces verbose phrases with short codes and prepends a tiny decoder header.</p>
+      </div>
+      <div class="step-card" onmousemove="trackMouse(event, this)">
+        <div class="step-num">03</div><h3>Use fewer tokens</h3>
+        <p>Use the compressed version in your API calls. Same AI quality, fewer tokens.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="sdk-section">
+  <div class="sdk-inner">
+    <div class="section-heading"><div class="line"></div><h2>Drop-in SDK</h2><div class="line"></div></div>
+    <p class="sdk-desc">Two lines of code. Automatic compression on every API call.</p>
+    <div class="code-block">
+      <div class="code-header">
+        <div class="dot r"></div><div class="dot y"></div><div class="dot g"></div>
+        <span class="filename">app.js</span>
+      </div>
+      <div class="code-body">
+<pre><span class="kw">import</span> { <span class="fn">compress</span> } <span class="kw">from</span> <span class="str">'tokenshrink'</span>;
+<span class="kw">import</span> OpenAI <span class="kw">from</span> <span class="str">'openai'</span>;
+
+<span class="cm">// Compress your system prompt</span>
+<span class="kw">const</span> { compressed, stats } = <span class="fn">compress</span>(longPrompt);
+console.<span class="fn">log</span>(<span class="str">`Saved ${stats.tokensSaved} tokens`</span>);
+
+<span class="cm">// Use with any LLM</span>
+<span class="kw">const</span> openai = <span class="kw">new</span> <span class="fn">OpenAI</span>();
+<span class="kw">const</span> res = <span class="kw">await</span> openai.chat.completions.<span class="fn">create</span>({
+  model: <span class="str">'gpt-4o'</span>,
+  messages: [{ role: <span class="str">'system'</span>, content: compressed }],
+});</pre>
+      </div>
+    </div>
+    <div style="text-align: center; margin-top: 20px;"><span class="npm-install">npm install tokenshrink</span></div>
+  </div>
+</section>
+
+<section class="cta-section">
+  <h2>> Compress your<br><span class="green">prompts for free</span></h2>
+  <p>No account required. Open source. Compress and ship.</p>
+  <a href="#" class="cta-btn">Get started</a>
+</section>
+
+<footer>
+  <div class="footer-inner">
+    <div class="footer-left">Token<span class="g">Shrink</span> &middot; 2026 &middot; Open source</div>
+    <div class="footer-links">
+      <a href="#">Docs</a><a href="#">Providers</a><a href="#">Integrations</a>
+      <a href="#">Terms</a><a href="#">Privacy</a><a href="#">GitHub</a>
+    </div>
+  </div>
+</footer>
+
+<div class="preview-banner">
+  <strong>PREVIEW</strong> — Visual upgrade prototype. Say "go" to apply these changes to the real site.
+</div>
+
+<script>
+function trackMouse(e, el) {
+  const rect = el.getBoundingClientRect();
+  el.style.setProperty('--mx', ((e.clientX - rect.left) / rect.width * 100) + '%');
+  el.style.setProperty('--my', ((e.clientY - rect.top) / rect.height * 100) + '%');
+}
+
+const SAMPLE = "You are an expert full-stack development assistant. Your primary responsibility is to help engineers build, debug, and deploy production-ready applications. Your main task is to provide clear guidance on architecture, authentication, database design, API development, and deployment configuration.\n\nYou should always write clean, well-structured code. You should include comprehensive error handling in every function. You should follow established design patterns and best practices.\n\nIt is important to consider security at every layer of the application. It is important to validate all user input before processing. It is important to sanitize data before storing it in the database.\n\nPlease make sure to explain your reasoning before writing code. Please make sure to break complex problems into smaller, manageable steps. Please make sure to consider edge cases and failure modes.\n\nIn order to maintain code quality, you must follow consistent naming conventions across the codebase. You must write meaningful commit messages that describe the change and its purpose.";
+
+const REPLACEMENTS = [
+  ["Your primary responsibility is to", ""],
+  ["Your main task is to", ""],
+  ["You should always", ""],
+  ["You should include", "Include"],
+  ["You should follow", "Follow"],
+  ["It is important to consider", "Consider"],
+  ["It is important to validate", "Validate"],
+  ["It is important to sanitize", "Sanitize"],
+  ["Please make sure to explain", "Explain"],
+  ["Please make sure to break", "Break"],
+  ["Please make sure to consider", "Consider"],
+  ["In order to maintain", "To maintain"],
+  ["you must follow", "follow"],
+  ["You must write", "Write"],
+  ["that describe the change and its purpose", "describing changes"],
+  ["production-ready applications", "prod apps"],
+  ["comprehensive error handling", "error handling"],
+  ["established design patterns and best practices", "best practices"],
+  ["at every layer of the application", "at every layer"],
+  ["all user input before processing", "all input"],
+];
+
+function compress(text) {
+  let result = text;
+  let count = 0;
+  for (const [from, to] of REPLACEMENTS) {
+    if (result.includes(from)) { result = result.replace(from, to); count++; }
+  }
+  result = result.replace(/  +/g, ' ').replace(/\n\s*\n\s*\n/g, '\n\n').trim();
+  const origTokens = Math.ceil(text.length / 4);
+  const compTokens = Math.ceil(result.length / 4);
+  return { compressed: result, origTokens, compTokens, saved: origTokens - compTokens, replacements: count };
+}
+
+function buildDiffDOM(text, container, type) {
+  container.textContent = '';
+  if (type === 'original') {
+    let remaining = text;
+    for (const [from] of REPLACEMENTS) {
+      const idx = remaining.indexOf(from);
+      if (idx === -1) continue;
+      if (idx > 0) container.appendChild(document.createTextNode(remaining.substring(0, idx)));
+      const mark = document.createElement('mark');
+      mark.className = 'diff-removed';
+      mark.textContent = from;
+      container.appendChild(mark);
+      remaining = remaining.substring(idx + from.length);
+    }
+    if (remaining) container.appendChild(document.createTextNode(remaining));
+  } else {
+    let remaining = text;
+    for (const [, to] of REPLACEMENTS) {
+      if (!to) continue;
+      const idx = remaining.indexOf(to);
+      if (idx === -1) continue;
+      if (idx > 0) container.appendChild(document.createTextNode(remaining.substring(0, idx)));
+      const mark = document.createElement('mark');
+      mark.className = 'diff-added';
+      mark.textContent = to;
+      container.appendChild(mark);
+      remaining = remaining.substring(idx + to.length);
+    }
+    if (remaining) container.appendChild(document.createTextNode(remaining));
+  }
+}
+
+function loadSample() {
+  document.getElementById('input').value = SAMPLE;
+  runDemo();
+}
+
+function runDemo() {
+  const text = document.getElementById('input').value.trim();
+  if (!text) return;
+  const r = compress(text);
+
+  animateCount(document.getElementById('saved-count'), 0, r.saved, ' tokens saved');
+  document.getElementById('saved-detail').textContent =
+    (r.origTokens / r.compTokens).toFixed(2) + 'x compression \u00B7 ' + r.origTokens + ' \u2192 ' + r.compTokens + ' tokens';
+  document.getElementById('orig-tokens').textContent = r.origTokens + ' tokens';
+  document.getElementById('comp-tokens').textContent = r.compTokens + ' tokens';
+  document.getElementById('repl-count').textContent = r.replacements;
+
+  buildDiffDOM(text, document.getElementById('original-text'), 'original');
+  buildDiffDOM(r.compressed, document.getElementById('compressed-text'), 'compressed');
+
+  document.getElementById('results').classList.add('active');
+}
+
+function animateCount(el, from, to, suffix) {
+  const duration = 600, start = performance.now();
+  function tick(now) {
+    const progress = Math.min((now - start) / duration, 1);
+    const eased = 1 - Math.pow(1 - progress, 3);
+    el.textContent = Math.round(from + (to - from) * eased).toLocaleString() + suffix;
+    if (progress < 1) requestAnimationFrame(tick);
+  }
+  requestAnimationFrame(tick);
+}
+
+let globalCount = 12847;
+setInterval(function() {
+  globalCount += Math.floor(Math.random() * 5) + 1;
+  const el = document.getElementById('live-counter');
+  if (el) el.textContent = globalCount.toLocaleString();
+}, 3000);
+
+document.getElementById('input').addEventListener('keydown', function(e) {
+  if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') runDemo();
+});
+</script>
+</body>
+</html>

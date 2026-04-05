@@ -36,7 +36,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         return true;
       } catch (e) {
         console.error('Auth signIn error:', e);
-        return true;
+        return false;
       }
     },
     async session({ session }) {
