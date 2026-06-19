@@ -1,5 +1,5 @@
 import { db } from '@/app/lib/db';
-import { usageMeters, subscriptions, users } from '@/schema/schema';
+import { usageMeters, subscriptions } from '@/schema/schema';
 import { eq, and } from 'drizzle-orm';
 import { getCurrentPeriod } from '@/app/lib/billing';
 
@@ -8,18 +8,19 @@ export const FREE_TIER_CALL_LIMIT = 500;
 export async function getCompressionTier(userId) {
   if (!userId) return { tier: 'anonymous' };
 
-  // Check for active Pro subscription
+  // Subscription records are the source of truth for billing state.
   const sub = await db
     .select({
       status: subscriptions.status,
-      plan: users.plan,
     })
     .from(subscriptions)
-    .innerJoin(users, eq(subscriptions.userId, users.id))
-    .where(and(eq(subscriptions.userId, userId), eq(subscriptions.status, 'active')))
+    .where(and(
+      eq(subscriptions.userId, userId),
+      eq(subscriptions.status, 'active'),
+    ))
     .limit(1);
 
-  if (sub.length > 0 && sub[0].plan === 'advanced') {
+  if (sub.length > 0) {
     return { tier: 'pro' };
   }
 

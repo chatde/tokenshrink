@@ -47,6 +47,18 @@ npm run db:studio        # Open Drizzle Studio
 git push origin main     # Triggers Vercel auto-deploy
 ```
 
+## Reddit / Community Post Workflow
+
+When posting to Reddit (r/ClaudeAI or similar):
+
+1. **Draft in ChatGPT first** — switch to ChatGPT tab in OpenClaw browser, type the prompt asking for a Reddit-toned rewrite
+2. **Rules for the prompt to ChatGPT**: genuine solo dev tone, no hype words, no em dashes, casual, slightly self-deprecating, end asking for feedback, under 150 words
+3. **Only mention TokenShrink** — no links to side projects (API Guardrails, Spore Agent Arena) — r/ClaudeAI modbot flags multi-project posts
+4. **No pricing in the post** — let users discover it on the site
+5. **Claude-first title** — r/ClaudeAI audience, lead with Claude even if it works with all LLMs
+6. **Post via OpenClaw**: `openclaw browser navigate "https://www.reddit.com/r/ClaudeAI/submit/?type=TEXT"` → set title via shadow DOM native setter, type body into `textbox "Post body text field"` ref
+7. **After posting** — check for modbot response within 2 min, repost if flagged
+
 ## Project-Specific Rules
 
 - **No console.log in production code.**

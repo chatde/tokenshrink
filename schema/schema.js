@@ -65,4 +65,12 @@ const usageMeters = pgTable('usage_meters', {
   uniqueIndex('usage_user_period_idx').on(table.userId, table.period),
 ]);
 
-module.exports = { users, apiKeys, compressions, subscriptions, usageMeters };
+const rateLimits = pgTable('rate_limits', {
+  id: text('id').primaryKey(),
+  count: integer('count').notNull().default(0),
+  expiresAt: timestamp('expires_at').notNull(),
+}, (table) => [
+  index('rate_limits_expires_idx').on(table.expiresAt),
+]);
+
+module.exports = { users, apiKeys, compressions, subscriptions, usageMeters, rateLimits };

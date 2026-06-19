@@ -1,4 +1,7 @@
 import { kv } from '@vercel/kv';
+import { db } from '@/app/lib/db';
+import { rateLimits } from '@/schema/schema';
+import { sql, lt } from 'drizzle-orm';
 
 const rateLimit = new Map();
 const CLEANUP_INTERVAL_MS = 5 * 60 * 1000;
@@ -52,19 +55,44 @@ function inMemoryRateLimit(key, { limit = 10, windowMs = 60_000 } = {}) {
 }
 
 export async function checkRateLimit(key, { limit = 10, windowMs = 60_000 } = {}) {
-  if (!process.env.KV_URL) {
-    return inMemoryRateLimit(key, { limit, windowMs });
+  const now = Date.now();
+
+  if (process.env.KV_URL) {
+    const window = Math.floor(now / windowMs);
+    const kvKey = `rl:${key}:${window}`;
+    const reset = (window + 1) * windowMs;
+
+    try {
+      const count = await kv.incr(kvKey);
+      if (count === 1) {
+        await kv.expire(kvKey, Math.ceil(windowMs / 1000) + 1);
+      }
+
+      return normalizeResult({ count, limit, reset, windowMs });
+    } catch {
+      return inMemoryRateLimit(key, { limit, windowMs });
+    }
   }
 
-  const now = Date.now();
-  const window = Math.floor(now / windowMs);
-  const kvKey = `rl:${key}:${window}`;
-  const reset = (window + 1) * windowMs;
-
+  // No KV configured — use Postgres-backed fixed-window limiter.
   try {
-    const count = await kv.incr(kvKey);
-    if (count === 1) {
-      await kv.expire(kvKey, Math.ceil(windowMs / 1000) + 1);
+    const windowIndex = Math.floor(now / windowMs);
+    const id = `${key}:${windowIndex}`;
+    const reset = (windowIndex + 1) * windowMs;
+
+    const rows = await db.insert(rateLimits)
+      .values({ id, count: 1, expiresAt: new Date(reset + windowMs) })
+      .onConflictDoUpdate({ target: rateLimits.id, set: { count: sql`${rateLimits.count} + 1` } })
+      .returning({ count: rateLimits.count });
+
+    const count = rows[0].count;
+
+    if (Math.random() < 0.01) {
+      try {
+        await db.delete(rateLimits).where(lt(rateLimits.expiresAt, new Date()));
+      } catch {
+        // swallow cleanup errors
+      }
     }
 
     return normalizeResult({ count, limit, reset, windowMs });

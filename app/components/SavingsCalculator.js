@@ -2,10 +2,27 @@
 
 import { useState } from 'react';
 
-export default function SavingsCalculator() {
-  const [monthlySpend, setMonthlySpend] = useState(200);
+const DEFAULT_MONTHLY_SPEND = 200;
+const MIN_MONTHLY_SPEND = 50;
+const MAX_MONTHLY_SPEND = 2000;
+const MONTHLY_SPEND_STEP = 50;
 
-  const savings = Math.round(monthlySpend * 0.65);
+function sanitizeMonthlySpend(value) {
+  if (!Number.isFinite(value)) {
+    return DEFAULT_MONTHLY_SPEND;
+  }
+
+  return Math.min(
+    MAX_MONTHLY_SPEND,
+    Math.max(MIN_MONTHLY_SPEND, Math.round(value / MONTHLY_SPEND_STEP) * MONTHLY_SPEND_STEP),
+  );
+}
+
+export default function SavingsCalculator() {
+  const [monthlySpend, setMonthlySpend] = useState(DEFAULT_MONTHLY_SPEND);
+  const safeMonthlySpend = sanitizeMonthlySpend(monthlySpend);
+
+  const savings = Math.round(safeMonthlySpend * 0.65);
   const netSavings = savings - 19; // After Pro subscription
 
   return (
@@ -19,15 +36,15 @@ export default function SavingsCalculator() {
         <span className="absolute left-4 top-1/2 -translate-y-1/2 text-text-muted">$</span>
         <input
           type="range"
-          min={50}
-          max={2000}
-          step={50}
-          value={monthlySpend}
-          onChange={(e) => setMonthlySpend(Number(e.target.value))}
+          min={MIN_MONTHLY_SPEND}
+          max={MAX_MONTHLY_SPEND}
+          step={MONTHLY_SPEND_STEP}
+          value={safeMonthlySpend}
+          onChange={(e) => setMonthlySpend(sanitizeMonthlySpend(Number(e.target.value)))}
           className="w-full mt-2 accent-savings"
         />
         <div className="text-center text-2xl font-bold text-text mt-2">
-          ${monthlySpend}/mo
+          ${safeMonthlySpend}/mo
         </div>
       </div>
 
