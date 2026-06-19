@@ -11,7 +11,7 @@ const path = require('path');
 const os = require('os');
 
 const VOCAB_FILE = os.homedir() + '/.claude/session-vocab.json';
-const SDK_PATH = '/Volumes/AI-Models/tokenshrink/sdk/src/codebook.js';
+const SDK_PATH = path.join(__dirname, "..", "sdk", "src", "codebook.js");
 
 // Ecosystem-wide base vocab (always present regardless of project)
 const BASE_VOCAB = [
