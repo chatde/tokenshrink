@@ -6,6 +6,10 @@ import { REACT_VOCAB } from './react.js';
 import { NODE_VOCAB } from './node.js';
 import { PYTHON_VOCAB } from './python.js';
 import { SUPABASE_VOCAB } from './supabase.js';
+import { SQL_VOCAB } from './sql.js';
+import { TYPESCRIPT_VOCAB } from './typescript.js';
+import { DOCKER_VOCAB } from './docker.js';
+import { TAILWIND_VOCAB } from './tailwind.js';
 
 /**
  * Registry mapping domain names to their vocab arrays.
@@ -16,6 +20,10 @@ export const DOMAIN_REGISTRY = {
   node: NODE_VOCAB,
   python: PYTHON_VOCAB,
   supabase: SUPABASE_VOCAB,
+  sql: SQL_VOCAB,
+  typescript: TYPESCRIPT_VOCAB,
+  docker: DOCKER_VOCAB,
+  tailwind: TAILWIND_VOCAB,
 };
 
 /**
@@ -48,11 +56,31 @@ export function getDomainVocab(packageJsonContent, cwd = null) {
     if (hasAny(allDeps, ['@supabase/supabase-js', '@supabase/ssr', '@supabase/auth-helpers-nextjs'])) {
       detectedDomains.push('supabase');
     }
+
+    // SQL / Database ORMs
+    if (hasAny(allDeps, ['pg', 'mysql', 'mysql2', 'prisma', 'drizzle-orm', 'knex', 'sequelize', 'typeorm', '@prisma/client'])) {
+      detectedDomains.push('sql');
+    }
+
+    // TypeScript
+    if (hasAny(allDeps, ['typescript', 'ts-node', 'tsx', 'tslib'])) {
+      detectedDomains.push('typescript');
+    }
+
+    // Tailwind CSS
+    if (hasAny(allDeps, ['tailwindcss', '@tailwindcss/typography', '@tailwindcss/forms', '@tailwindcss/postcss'])) {
+      detectedDomains.push('tailwind');
+    }
   } else {
     // No package.json — attempt filesystem-based Python detection
     if (hasPythonSignals(cwd)) {
       detectedDomains.push('python');
     }
+  }
+
+  // Docker detection via filesystem (works regardless of package.json)
+  if (hasDockerSignals(cwd)) {
+    detectedDomains.push('docker');
   }
 
   // Deduplicate vocab across all activated rotors
@@ -132,6 +160,28 @@ function hasPythonSignals(cwd = null) {
       existsSync(resolve(dir, 'setup.py')) ||
       existsSync(resolve(dir, 'pyproject.toml')) ||
       existsSync(resolve(dir, 'Pipfile'))
+    );
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Detect Docker/DevOps signals via the filesystem.
+ *
+ * @returns {boolean}
+ */
+function hasDockerSignals(cwd = null) {
+  try {
+    const { existsSync } = require('fs');
+    const { resolve } = require('path');
+    const dir = cwd || process.cwd();
+    return (
+      existsSync(resolve(dir, 'Dockerfile')) ||
+      existsSync(resolve(dir, 'docker-compose.yml')) ||
+      existsSync(resolve(dir, 'docker-compose.yaml')) ||
+      existsSync(resolve(dir, 'compose.yml')) ||
+      existsSync(resolve(dir, 'compose.yaml'))
     );
   } catch {
     return false;

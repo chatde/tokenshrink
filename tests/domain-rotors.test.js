@@ -6,8 +6,8 @@ import { PYTHON_VOCAB } from '../sdk/src/domains/python.js';
 import { SUPABASE_VOCAB } from '../sdk/src/domains/supabase.js';
 
 describe('DOMAIN_REGISTRY', () => {
-  it('exports all 4 domains', () => {
-    expect(Object.keys(DOMAIN_REGISTRY)).toEqual(['react', 'node', 'python', 'supabase']);
+  it('exports all 8 domains', () => {
+    expect(Object.keys(DOMAIN_REGISTRY).sort()).toEqual(['docker', 'node', 'python', 'react', 'sql', 'supabase', 'tailwind', 'typescript']);
   });
 
   it('each domain has vocab entries', () => {

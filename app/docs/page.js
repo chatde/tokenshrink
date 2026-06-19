@@ -13,10 +13,80 @@ export default function DocsPage() {
         <div className="max-w-3xl mx-auto py-12">
           <h1 className="text-3xl font-bold text-text mb-2">API Documentation</h1>
           <p className="text-text-secondary mb-10">
-            Compress prompts programmatically via our REST API or npm SDK.
+            Compress prompts programmatically via our REST API, npm SDK, or one-line CLI install.
           </p>
 
-          {/* Quick start */}
+          {/* ── Claude Code Integration ─────────────────────────────────── */}
+          <section className="mb-12">
+            <h2 className="text-xl font-semibold text-text mb-4">Claude Code Integration</h2>
+            <div className="space-y-4">
+              <div className="bg-bg-card border border-savings/20 rounded-xl p-5">
+                <h3 className="text-sm font-medium text-savings mb-3">One-line install</h3>
+                <p className="text-sm text-text-secondary mb-3">
+                  Automatically installs TokenShrink hooks into your Claude Code project. Compresses every prompt
+                  before it hits the model — zero config.
+                </p>
+                <pre className="text-xs font-mono text-text-secondary bg-bg p-4 rounded-lg overflow-x-auto">
+{`curl -fsSL https://tokenshrink.com/install-claude-code.sh | bash`}
+                </pre>
+              </div>
+
+              <div className="bg-bg-card border border-border rounded-xl p-5">
+                <h3 className="text-sm font-medium text-savings mb-3">What gets installed</h3>
+                <ul className="space-y-2 text-sm text-text-secondary">
+                  <li className="flex items-start gap-2">
+                    <span className="text-savings mt-0.5">▸</span>
+                    <span><code className="text-xs bg-bg px-1.5 py-0.5 rounded">~/.claude/hooks/tokenshrink-compress.js</code> — Phrase compression on every user prompt (UserPromptSubmit hook)</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-savings mt-0.5">▸</span>
+                    <span><code className="text-xs bg-bg px-1.5 py-0.5 rounded">~/.claude/hooks/tokenshrink-agent-compress.js</code> — Agent prompt compression (PreToolUse hook)</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-savings mt-0.5">▸</span>
+                    <span><code className="text-xs bg-bg px-1.5 py-0.5 rounded">~/.claude/hooks/tokenshrink-session-init.js</code> — Session vocabulary generator (SessionStart hook)</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-savings mt-0.5">▸</span>
+                    <span><code className="text-xs bg-bg px-1.5 py-0.5 rounded">~/.claude/session-vocab.json</code> — Project-specific abbreviation dictionary</span>
+                  </li>
+                </ul>
+              </div>
+
+              <div className="bg-bg-card border border-border rounded-xl p-5">
+                <h3 className="text-sm font-medium text-savings mb-3">How it works with Claude Code</h3>
+                <ol className="space-y-2 text-sm text-text-secondary list-decimal list-inside">
+                  <li>On session start, TokenShrink scans your project and builds a session vocabulary</li>
+                  <li>Every prompt you send is compressed — filler words removed, project terms abbreviated</li>
+                  <li>A tiny Rosetta Stone header teaches Claude the abbreviations</li>
+                  <li>Claude uses the same abbreviations in responses — bidirectional savings</li>
+                  <li>Savings accumulate across the entire session</li>
+                </ol>
+              </div>
+            </div>
+          </section>
+
+          {/* ── Cursor Integration ──────────────────────────────────────── */}
+          <section className="mb-12">
+            <h2 className="text-xl font-semibold text-text mb-4">Cursor Integration</h2>
+            <div className="bg-bg-card border border-border rounded-xl p-5">
+              <p className="text-sm text-text-secondary mb-3">
+                Use TokenShrink as a preprocessor for Cursor&apos;s AI features. Add to your project:
+              </p>
+              <pre className="text-xs font-mono text-text-secondary bg-bg p-4 rounded-lg overflow-x-auto">
+{`# Install the SDK
+npm install tokenshrink
+
+# Use in your Cursor rules or project config
+import { compress } from 'tokenshrink';
+
+// Compress before sending to Cursor's AI
+const { compressed, stats } = compress(yourPrompt);`}
+              </pre>
+            </div>
+          </section>
+
+          {/* ── Quick start ─────────────────────────────────────────────── */}
           <section className="mb-12">
             <h2 className="text-xl font-semibold text-text mb-4">Quick start</h2>
             <div className="space-y-4">
@@ -74,7 +144,43 @@ const res = await openai.chat.completions.create({
             </div>
           </section>
 
-          {/* API Reference */}
+          {/* ── Compression strategies ──────────────────────────────────── */}
+          <section className="mb-12">
+            <h2 className="text-xl font-semibold text-text mb-4">Compression strategies</h2>
+            <div className="space-y-4">
+              {[
+                {
+                  name: 'Phrase compression',
+                  savings: '5-15%',
+                  desc: 'Removes filler words and replaces verbose phrases with concise alternatives. Runs automatically on every prompt — no configuration needed.',
+                  example: '"I would like you to please make sure to check the file" → "check the file"',
+                },
+                {
+                  name: 'Domain compression',
+                  savings: '10-25%',
+                  desc: 'Auto-detects your tech stack from package.json and applies domain-specific abbreviations. Supports React, Node.js, Python, Supabase, SQL, TypeScript, Docker, Tailwind.',
+                  example: '"useCallback" → "UCB", "getServerSideProps" → "SSP"',
+                },
+                {
+                  name: 'Session vocabulary',
+                  savings: '15-35%',
+                  desc: 'Advanced feature. At session start, builds a project-specific codebook. Both you and the AI use the same abbreviations. Cost is paid once, amortized across every message.',
+                  example: '"/Volumes/AI-Models/" → "SSD/" on every prompt, forever',
+                },
+              ].map(({ name, savings, desc, example }) => (
+                <div key={name} className="bg-bg-card border border-border rounded-xl p-5">
+                  <div className="flex items-center justify-between mb-2">
+                    <h3 className="text-sm font-semibold text-text">{name}</h3>
+                    <span className="text-xs font-mono text-savings bg-savings/10 px-2 py-0.5 rounded">{savings} savings</span>
+                  </div>
+                  <p className="text-sm text-text-secondary mb-2">{desc}</p>
+                  <p className="text-xs text-text-muted font-mono">{example}</p>
+                </div>
+              ))}
+            </div>
+          </section>
+
+          {/* ── API Reference ───────────────────────────────────────────── */}
           <section className="mb-12">
             <h2 className="text-xl font-semibold text-text mb-4">API Reference</h2>
 
@@ -148,7 +254,7 @@ const res = await openai.chat.completions.create({
             </div>
           </section>
 
-          {/* Rate limits */}
+          {/* ── Rate limits ─────────────────────────────────────────────── */}
           <section className="mb-12">
             <h2 className="text-xl font-semibold text-text mb-4">Rate limits</h2>
             <div className="bg-bg-card border border-border rounded-xl p-5">
@@ -173,7 +279,7 @@ const res = await openai.chat.completions.create({
             </div>
           </section>
 
-          {/* Tokenizer */}
+          {/* ── Tokenizer ───────────────────────────────────────────────── */}
           <section className="mb-12">
             <h2 className="text-xl font-semibold text-text mb-4">Token counting</h2>
             <div className="bg-bg-card border border-border rounded-xl p-5">
@@ -193,7 +299,7 @@ const result = compress(text, {
             </div>
           </section>
 
-          {/* Domains */}
+          {/* ── Domains ─────────────────────────────────────────────────── */}
           <section>
             <h2 className="text-xl font-semibold text-text mb-4">Compression domains</h2>
             <div className="bg-bg-card border border-border rounded-xl p-5">

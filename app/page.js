@@ -146,6 +146,58 @@ export default function Home() {
           </div>
         </section>
 
+        {/* Real-world use cases */}
+        <section className="px-6 py-20 border-t border-border bg-bg-secondary">
+          <div className="max-w-4xl mx-auto">
+            <FadeIn>
+              <div className="flex items-center gap-3 mb-12">
+                <div className="h-px flex-1 bg-border" />
+                <h2 className="text-xl font-semibold text-text-secondary">Real-World Savings</h2>
+                <div className="h-px flex-1 bg-border" />
+              </div>
+            </FadeIn>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {[
+                {
+                  icon: '💰',
+                  title: 'Cut API costs 20-35%',
+                  desc: 'Long system prompts for GPT-4, Claude, or Gemini compress significantly. One customer saved $120/month on a 50K-token daily pipeline.',
+                  stat: '$120/mo',
+                  statLabel: 'saved',
+                },
+                {
+                  icon: '⚡',
+                  title: 'Faster Claude Code sessions',
+                  desc: 'Compress your CLAUDE.md and project context. Smaller prompts = faster responses. The session vocabulary feature pays for itself in 3 messages.',
+                  stat: '3 msgs',
+                  statLabel: 'to ROI',
+                },
+                {
+                  icon: '🔧',
+                  title: 'Production prompt pipelines',
+                  desc: 'Running the same system prompt 10,000x/day? TokenShrink SDK compresses once, reuses everywhere. Drop-in npm package, zero config.',
+                  stat: '2 lines',
+                  statLabel: 'of code',
+                },
+              ].map(({ icon, title, desc, stat, statLabel }, i) => (
+                <FadeIn key={title} delay={i * 150}>
+                  <TiltWrapper>
+                    <AuroraCard className="bg-bg-card border border-border rounded-xl p-6 hover:border-border-hover transition-all h-full flex flex-col">
+                      <div className="text-2xl mb-3">{icon}</div>
+                      <h3 className="text-base font-semibold text-text mb-2">{title}</h3>
+                      <p className="text-sm text-text-secondary flex-1">{desc}</p>
+                      <div className="mt-4 pt-4 border-t border-border">
+                        <span className="text-2xl font-bold text-savings font-mono">{stat}</span>
+                        <span className="text-xs text-text-muted ml-2">{statLabel}</span>
+                      </div>
+                    </AuroraCard>
+                  </TiltWrapper>
+                </FadeIn>
+              ))}
+            </div>
+          </div>
+        </section>
+
         {/* SDK / Developer section */}
         <section className="px-6 py-20 border-t border-border">
           <div className="max-w-3xl mx-auto">
@@ -198,17 +250,42 @@ const res = await openai.chat.completions.create({
           </div>
         </section>
 
+        {/* Integrations strip */}
+        <section className="px-6 py-16 border-t border-border bg-bg-secondary">
+          <div className="max-w-4xl mx-auto text-center">
+            <FadeIn>
+              <h2 className="text-xl font-semibold text-text-secondary mb-8">Works with your stack</h2>
+            </FadeIn>
+            <FadeIn delay={100}>
+              <div className="flex flex-wrap justify-center gap-3">
+                {[
+                  'Claude Code', 'Cursor', 'Continue', 'Aider',
+                  'OpenAI', 'Anthropic', 'Google Gemini', 'Ollama',
+                  'Mistral', 'Cohere', 'Llama', 'vLLM',
+                ].map((name) => (
+                  <span
+                    key={name}
+                    className="px-3 py-1.5 text-xs font-mono text-text-secondary bg-bg-card border border-border rounded-lg hover:border-savings/30 hover:text-savings transition-colors"
+                  >
+                    {name}
+                  </span>
+                ))}
+              </div>
+            </FadeIn>
+          </div>
+        </section>
+
         {/* CTA */}
-        <section className="px-6 py-20 border-t border-border bg-bg-secondary text-center">
+        <section className="px-6 py-20 border-t border-border text-center">
           <FadeIn>
             <h2 className="text-3xl font-bold text-text mb-4">
-              <span className="terminal-prompt" />Compress your<br />
-              <span className="text-savings">prompts for free</span>
+              <span className="terminal-prompt" />Start saving tokens<br />
+              <span className="text-savings">in 30 seconds</span>
             </h2>
           </FadeIn>
           <FadeIn delay={100}>
-            <p className="text-text-secondary mb-8">
-              No account required. Open source. Compress and ship.
+            <p className="text-text-secondary mb-8 max-w-lg mx-auto">
+              No account required. No credit card. Open source. Paste your prompt and see the savings instantly.
             </p>
           </FadeIn>
           <FadeIn delay={200}>
@@ -217,14 +294,24 @@ const res = await openai.chat.completions.create({
             </div>
           </FadeIn>
           <FadeIn delay={300}>
-            <MagneticButton as="div" className="inline-block">
-              <Link
-                href="/login"
-                className="inline-block px-8 py-3 bg-savings text-bg font-semibold rounded-lg hover:bg-savings/90 transition-all text-sm"
+            <div className="flex items-center justify-center gap-4">
+              <MagneticButton as="div" className="inline-block">
+                <a
+                  href="#top"
+                  className="inline-block px-8 py-3 bg-savings text-bg font-semibold rounded-lg hover:bg-savings/90 transition-all text-sm"
+                >
+                  Try it now — it&apos;s free
+                </a>
+              </MagneticButton>
+              <a
+                href="https://github.com/chatde/tokenshrink"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-block px-6 py-3 border border-border text-text-secondary font-medium rounded-lg hover:bg-bg-card transition-all text-sm"
               >
-                Get started
-              </Link>
-            </MagneticButton>
+                View on GitHub
+              </a>
+            </div>
           </FadeIn>
         </section>
 
@@ -241,6 +328,7 @@ const res = await openai.chat.completions.create({
               </div>
               <div className="flex items-center gap-5 text-xs text-text-muted">
                 <Link href="/docs" className="hover:text-text transition-colors">Docs</Link>
+                <Link href="/changelog" className="hover:text-text transition-colors">Changelog</Link>
                 <Link href="/providers" className="hover:text-text transition-colors">Providers</Link>
                 <Link href="/integrations" className="hover:text-text transition-colors">Integrations</Link>
                 <Link href="/terms" className="hover:text-text transition-colors">Terms</Link>

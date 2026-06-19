@@ -42,10 +42,10 @@ describe('SDK public exports', () => {
     expect(typeof sdk.DOMAIN_REGISTRY).toBe('object');
   });
 
-  it('DOMAIN_REGISTRY has all 4 domains', async () => {
+  it('DOMAIN_REGISTRY has all 8 domains', async () => {
     const { DOMAIN_REGISTRY } = await import('../sdk/src/index.js');
 
-    expect(Object.keys(DOMAIN_REGISTRY).sort()).toEqual(['node', 'python', 'react', 'supabase']);
+    expect(Object.keys(DOMAIN_REGISTRY).sort()).toEqual(['docker', 'node', 'python', 'react', 'sql', 'supabase', 'tailwind', 'typescript']);
   });
 
   it('compress() is callable and returns expected shape', async () => {
