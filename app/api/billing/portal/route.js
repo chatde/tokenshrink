@@ -4,8 +4,11 @@ import { db } from '@/app/lib/db';
 import { users } from '@/schema/schema';
 import { eq } from 'drizzle-orm';
 import { getStripe } from '@/app/lib/stripe';
+import { isSameOrigin } from '@/app/lib/request-safety';
+import { checkRateLimit, rateLimitResponse } from '@/app/lib/rate-limit';
 
-export async function POST() {
+export async function POST(request) {
+  if (!isSameOrigin(request)) return NextResponse.json({ error: 'Invalid origin' }, { status: 403 });
   try {
     const stripe = getStripe();
     if (!stripe) {
@@ -16,6 +19,8 @@ export async function POST() {
     if (!session?.user?.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
+    const rate = await checkRateLimit(`portal:${session.user.id}`, { limit: 10, windowMs: 60000 });
+    if (!rate.allowed) return rateLimitResponse(rate.retryAfter);
 
     const dbUser = await db
       .select()

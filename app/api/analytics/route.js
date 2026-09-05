@@ -3,6 +3,7 @@ import { sql } from 'drizzle-orm';
 import { db } from '@/app/lib/db';
 import { checkRateLimit, rateLimitResponse } from '@/app/lib/rate-limit';
 import { validateAnalyticsEvent } from '@/app/lib/analytics-input';
+import { readJsonLimited, RequestError } from '@/app/lib/request-safety';
 
 const CORS_HEADERS = {
   'Access-Control-Allow-Origin': '*',
@@ -21,14 +22,14 @@ export async function POST(request) {
       for (const [key, value] of Object.entries(CORS_HEADERS)) response.headers.set(key, value);
       return response;
     }
-    let body;
-    try { body = await request.json(); } catch { body = null; }
+    const body = await readJsonLimited(request);
     const event = validateAnalyticsEvent(body);
     if (!event) return NextResponse.json({ ok: false, error: 'Invalid analytics event' }, { status: 400, headers: CORS_HEADERS });
     await db.execute(sql`INSERT INTO analytics_events (event, before_tokens, after_tokens, saved_tokens, source)
       VALUES (${event.event}, ${event.before}, ${event.after}, ${event.saved}, ${event.source})`);
     return NextResponse.json({ ok: true }, { headers: CORS_HEADERS });
-  } catch {
+  } catch (error) {
+    if (error instanceof RequestError) return NextResponse.json({ ok: false, error: error.message }, { status: error.status, headers: CORS_HEADERS });
     // SDK requests remain non-blocking, but operators must see persistence failures.
     console.error('Analytics persistence unavailable');
     return NextResponse.json({ ok: false, error: 'Analytics unavailable' }, { status: 503, headers: CORS_HEADERS });

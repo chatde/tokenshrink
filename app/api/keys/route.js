@@ -5,6 +5,7 @@ import { apiKeys } from '@/schema/schema';
 import { eq, and, isNull } from 'drizzle-orm';
 import { createHash, randomBytes } from 'crypto';
 import { checkRateLimit, rateLimitResponse } from '@/app/lib/rate-limit';
+import { isSameOrigin, readJsonLimited, RequestError } from '@/app/lib/request-safety';
 
 export async function GET(request) {
   try {
@@ -28,7 +29,7 @@ export async function GET(request) {
       .from(apiKeys)
       .where(and(eq(apiKeys.userId, session.user.id), isNull(apiKeys.revokedAt)));
 
-    return NextResponse.json({ keys });
+    return NextResponse.json({ keys }, { headers: { 'Cache-Control': 'private, no-store' } });
   } catch (error) {
     console.error('API keys GET error:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
@@ -36,6 +37,7 @@ export async function GET(request) {
 }
 
 export async function POST(request) {
+  if (!isSameOrigin(request)) return NextResponse.json({ error: 'Invalid origin' }, { status: 403 });
   try {
     const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 'unknown';
     const rl = await checkRateLimit(ip, { limit: 30, windowMs: 60_000 });
@@ -48,12 +50,13 @@ export async function POST(request) {
 
     let body;
     try {
-      body = await request.json();
-    } catch {
-      return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 });
+      body = await readJsonLimited(request);
+    } catch (error) {
+      return NextResponse.json({ error: 'Invalid JSON body' }, { status: error instanceof RequestError ? error.status : 400 });
     }
 
     const label = typeof body?.label === 'string' && body.label.trim() ? body.label.trim() : 'Default';
+    if (label.length > 100) return NextResponse.json({ error: 'Label must be at most 100 characters' }, { status: 400 });
 
     const rawKey = `ts_live_${randomBytes(16).toString('hex')}`;
     const keyHash = createHash('sha256').update(rawKey).digest('hex');
@@ -66,7 +69,7 @@ export async function POST(request) {
       label,
     });
 
-    return NextResponse.json({ key: rawKey, prefix: keyPrefix });
+    return NextResponse.json({ key: rawKey, prefix: keyPrefix }, { headers: { 'Cache-Control': 'private, no-store' } });
   } catch (error) {
     console.error('API keys POST error:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
@@ -74,6 +77,7 @@ export async function POST(request) {
 }
 
 export async function DELETE(request) {
+  if (!isSameOrigin(request)) return NextResponse.json({ error: 'Invalid origin' }, { status: 403 });
   try {
     const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 'unknown';
     const rl = await checkRateLimit(ip, { limit: 30, windowMs: 60_000 });
@@ -86,9 +90,9 @@ export async function DELETE(request) {
 
     let body;
     try {
-      body = await request.json();
-    } catch {
-      return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 });
+      body = await readJsonLimited(request);
+    } catch (error) {
+      return NextResponse.json({ error: 'Invalid JSON body' }, { status: error instanceof RequestError ? error.status : 400 });
     }
 
     const id = typeof body?.id === 'string' ? body.id : '';

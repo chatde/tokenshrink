@@ -1,0 +1,247 @@
+{
+  "date": "2026-09-05",
+  "codec": "Aster-1",
+  "scope": "Synthetic input-history simulation, not production traffic or model answer-quality evaluation. Full decoder/dictionary charged each turn. No model API calls. No role framing, tool schemas, outputs, retries, cached pricing, or financial forecast included.",
+  "results": [
+    {
+      "encoding": "cl100k",
+      "fixture": "repeated_handoff",
+      "firstProfitableTurn": 3,
+      "totalOriginal": 24324,
+      "totalOutput": 10673,
+      "savedTokens": 13651,
+      "savingsPercent": 56.12,
+      "exactRoundTrip": true,
+      "turnCount": 24,
+      "turns": [
+        {
+          "turn": 1,
+          "applied": false,
+          "originalTokens": 82,
+          "outputTokens": 82,
+          "savedTokens": 0,
+          "candidateTokens": 165,
+          "dictionaryEntries": 0
+        },
+        {
+          "turn": 3,
+          "applied": true,
+          "originalTokens": 244,
+          "outputTokens": 222,
+          "savedTokens": 22,
+          "candidateTokens": 222,
+          "dictionaryEntries": 3
+        },
+        {
+          "turn": 8,
+          "applied": true,
+          "originalTokens": 649,
+          "outputTokens": 342,
+          "savedTokens": 307,
+          "candidateTokens": 342,
+          "dictionaryEntries": 3
+        },
+        {
+          "turn": 24,
+          "applied": true,
+          "originalTokens": 1945,
+          "outputTokens": 726,
+          "savedTokens": 1219,
+          "candidateTokens": 726,
+          "dictionaryEntries": 3
+        }
+      ]
+    },
+    {
+      "encoding": "cl100k",
+      "fixture": "unique_short_messages",
+      "firstProfitableTurn": null,
+      "totalOriginal": 35,
+      "totalOutput": 35,
+      "savedTokens": 0,
+      "savingsPercent": 0,
+      "exactRoundTrip": true,
+      "turnCount": 4,
+      "turns": [
+        {
+          "turn": 1,
+          "applied": false,
+          "originalTokens": 3,
+          "outputTokens": 3,
+          "savedTokens": 0,
+          "candidateTokens": 86,
+          "dictionaryEntries": 0
+        },
+        {
+          "turn": 3,
+          "applied": false,
+          "originalTokens": 12,
+          "outputTokens": 12,
+          "savedTokens": 0,
+          "candidateTokens": 95,
+          "dictionaryEntries": 0
+        }
+      ]
+    },
+    {
+      "encoding": "cl100k",
+      "fixture": "marker_heavy_literals",
+      "firstProfitableTurn": null,
+      "totalOriginal": 2672,
+      "totalOutput": 2672,
+      "savedTokens": 0,
+      "savingsPercent": 0,
+      "exactRoundTrip": true,
+      "turnCount": 8,
+      "turns": [
+        {
+          "turn": 1,
+          "applied": false,
+          "originalTokens": 75,
+          "outputTokens": 75,
+          "savedTokens": 0,
+          "candidateTokens": 177,
+          "dictionaryEntries": 0
+        },
+        {
+          "turn": 3,
+          "applied": false,
+          "originalTokens": 223,
+          "outputTokens": 223,
+          "savedTokens": 0,
+          "candidateTokens": 365,
+          "dictionaryEntries": 0
+        },
+        {
+          "turn": 8,
+          "applied": false,
+          "originalTokens": 593,
+          "outputTokens": 593,
+          "savedTokens": 0,
+          "candidateTokens": 835,
+          "dictionaryEntries": 0
+        }
+      ]
+    },
+    {
+      "encoding": "o200k",
+      "fixture": "repeated_handoff",
+      "firstProfitableTurn": 3,
+      "totalOriginal": 23748,
+      "totalOutput": 10647,
+      "savedTokens": 13101,
+      "savingsPercent": 55.17,
+      "exactRoundTrip": true,
+      "turnCount": 24,
+      "turns": [
+        {
+          "turn": 1,
+          "applied": false,
+          "originalTokens": 81,
+          "outputTokens": 81,
+          "savedTokens": 0,
+          "candidateTokens": 164,
+          "dictionaryEntries": 0
+        },
+        {
+          "turn": 3,
+          "applied": true,
+          "originalTokens": 239,
+          "outputTokens": 221,
+          "savedTokens": 18,
+          "candidateTokens": 221,
+          "dictionaryEntries": 3
+        },
+        {
+          "turn": 8,
+          "applied": true,
+          "originalTokens": 634,
+          "outputTokens": 341,
+          "savedTokens": 293,
+          "candidateTokens": 341,
+          "dictionaryEntries": 3
+        },
+        {
+          "turn": 24,
+          "applied": true,
+          "originalTokens": 1898,
+          "outputTokens": 725,
+          "savedTokens": 1173,
+          "candidateTokens": 725,
+          "dictionaryEntries": 3
+        }
+      ]
+    },
+    {
+      "encoding": "o200k",
+      "fixture": "unique_short_messages",
+      "firstProfitableTurn": null,
+      "totalOriginal": 39,
+      "totalOutput": 39,
+      "savedTokens": 0,
+      "savingsPercent": 0,
+      "exactRoundTrip": true,
+      "turnCount": 4,
+      "turns": [
+        {
+          "turn": 1,
+          "applied": false,
+          "originalTokens": 4,
+          "outputTokens": 4,
+          "savedTokens": 0,
+          "candidateTokens": 87,
+          "dictionaryEntries": 0
+        },
+        {
+          "turn": 3,
+          "applied": false,
+          "originalTokens": 13,
+          "outputTokens": 13,
+          "savedTokens": 0,
+          "candidateTokens": 96,
+          "dictionaryEntries": 0
+        }
+      ]
+    },
+    {
+      "encoding": "o200k",
+      "fixture": "marker_heavy_literals",
+      "firstProfitableTurn": null,
+      "totalOriginal": 2672,
+      "totalOutput": 2672,
+      "savedTokens": 0,
+      "savingsPercent": 0,
+      "exactRoundTrip": true,
+      "turnCount": 8,
+      "turns": [
+        {
+          "turn": 1,
+          "applied": false,
+          "originalTokens": 75,
+          "outputTokens": 75,
+          "savedTokens": 0,
+          "candidateTokens": 168,
+          "dictionaryEntries": 0
+        },
+        {
+          "turn": 3,
+          "applied": false,
+          "originalTokens": 223,
+          "outputTokens": 223,
+          "savedTokens": 0,
+          "candidateTokens": 336,
+          "dictionaryEntries": 0
+        },
+        {
+          "turn": 8,
+          "applied": false,
+          "originalTokens": 593,
+          "outputTokens": 593,
+          "savedTokens": 0,
+          "candidateTokens": 756,
+          "dictionaryEntries": 0
+        }
+      ]
+    }
+  ]
+}

@@ -5,6 +5,7 @@ import { db } from '@/app/lib/db';
 import { users, subscriptions } from '@/schema/schema';
 import { eq, and, inArray } from 'drizzle-orm';
 import { getStripe } from '@/app/lib/stripe';
+import { isSameOrigin, readJsonLimited, RequestError } from '@/app/lib/request-safety';
 
 const PRICE_MAP = {
   advanced: process.env.STRIPE_ADVANCED_PRICE_ID,
@@ -12,6 +13,7 @@ const PRICE_MAP = {
 };
 
 export async function POST(request) {
+  if (!isSameOrigin(request)) return NextResponse.json({ error: 'Invalid origin' }, { status: 403 });
   try {
     const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 'unknown';
     const rl = await checkRateLimit(ip, { limit: 30, windowMs: 60_000 });
@@ -29,9 +31,9 @@ export async function POST(request) {
 
     let body;
     try {
-      body = await request.json();
-    } catch {
-      return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 });
+      body = await readJsonLimited(request);
+    } catch (error) {
+      return NextResponse.json({ error: 'Invalid JSON body' }, { status: error instanceof RequestError ? error.status : 400 });
     }
 
     const plan = typeof body?.plan === 'string' ? body.plan : '';

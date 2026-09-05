@@ -1,0 +1,9 @@
+.git
+.env*
+node_modules
+.next
+sdk/src/experimental-session.js
+scripts/session-benchmark.mjs
+scripts/session-model-eval.mjs
+tests/experimental-session.test.js
+docs/session-codec.md

@@ -4,6 +4,7 @@ import Google from 'next-auth/providers/google';
 import { db } from './db';
 import { users } from '@/schema/schema';
 import { eq } from 'drizzle-orm';
+import { verifiedIdentity } from './verified-identity';
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   providers: [
@@ -17,8 +18,9 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     }),
   ],
   callbacks: {
-    async signIn({ user, account }) {
+    async signIn({ user, account, profile }) {
       try {
+        if (!await verifiedIdentity({ user, account, profile })) return false;
         const existing = await db
           .select()
           .from(users)

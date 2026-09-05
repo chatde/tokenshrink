@@ -17,3 +17,9 @@ preview-*.html
 .env*
 
 node_modules
+# Private codec research remains local until a distribution/license decision.
+sdk/src/experimental-session.js
+tests/experimental-session.test.js
+scripts/session-benchmark.mjs
+scripts/session-model-eval.mjs
+docs/session-codec.md

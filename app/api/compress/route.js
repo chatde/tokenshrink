@@ -2,7 +2,8 @@ import { NextResponse } from 'next/server';
 import { auth } from '@/app/lib/auth';
 import { db } from '@/app/lib/db';
 import { compressions, usageMeters, users, apiKeys } from '@/schema/schema';
-import { eq, and, isNull } from 'drizzle-orm';
+import { eq, and, isNull, sql } from 'drizzle-orm';
+import { readJsonLimited, RequestError } from '@/app/lib/request-safety';
 import { compress } from '@/app/lib/compression/engine';
 import { validateCompressionInput } from '@/app/lib/validate';
 import { checkRateLimit, rateLimitResponse } from '@/app/lib/rate-limit';
@@ -20,7 +21,7 @@ export async function POST(request) {
       || request.headers.get('x-real-ip')
       || 'unknown';
 
-    const body = await request.json();
+    const body = await readJsonLimited(request, 2_000_000);
     const { text, domain } = body;
 
     // Determine user — check API key first, then session
@@ -30,6 +31,7 @@ export async function POST(request) {
 
     const apiKey = request.headers.get('x-api-key');
     if (apiKey) {
+      if (apiKey.length > 256) return NextResponse.json({ error: 'Invalid API key' }, { status: 401 });
       const keyHash = createHash('sha256').update(apiKey).digest('hex');
       const result = await db
         .select({
@@ -75,7 +77,7 @@ export async function POST(request) {
     }
 
     // Compress
-    const result = compress(validation.text, {
+    const result = compress(text, {
       domain,
       tier: isProUser ? 'pro' : (isFreeExceeded ? 'basic' : 'free'),
     });
@@ -96,33 +98,20 @@ export async function POST(request) {
         compressedTokens: result.stats.totalCompressedTokens,
       });
 
-      // Upsert usage meter
-      const existing = await db
-        .select()
-        .from(usageMeters)
-        .where(and(eq(usageMeters.userId, userId), eq(usageMeters.period, period)))
-        .limit(1);
-
-      if (existing.length > 0) {
-        await db
-          .update(usageMeters)
-          .set({
-            wordsProcessed: existing[0].wordsProcessed + validation.words,
-            compressionCount: existing[0].compressionCount + 1,
-            tokensSaved: existing[0].tokensSaved + result.stats.tokensSaved,
-            dollarsSaved: existing[0].dollarsSaved + result.stats.dollarsSaved,
-          })
-          .where(eq(usageMeters.id, existing[0].id));
-      } else {
-        await db.insert(usageMeters).values({
+      // Atomic increments avoid lost usage when a user sends concurrent calls.
+      await db.insert(usageMeters).values({
           userId,
           period,
           wordsProcessed: validation.words,
           compressionCount: 1,
           tokensSaved: result.stats.tokensSaved,
           dollarsSaved: result.stats.dollarsSaved,
-        });
-      }
+        }).onConflictDoUpdate({ target: [usageMeters.userId, usageMeters.period], set: {
+          wordsProcessed: sql`${usageMeters.wordsProcessed} + ${validation.words}`,
+          compressionCount: sql`${usageMeters.compressionCount} + 1`,
+          tokensSaved: sql`${usageMeters.tokensSaved} + ${result.stats.tokensSaved}`,
+          dollarsSaved: sql`${usageMeters.dollarsSaved} + ${result.stats.dollarsSaved}`,
+        } });
 
       // Update lastUsedAt on API key
       if (apiKeyId) {
@@ -146,8 +135,9 @@ export async function POST(request) {
       rosetta: result.rosetta,
       stats: result.stats,
       ...responseExtra,
-    });
+    }, { headers: { 'Cache-Control': 'private, no-store' } });
   } catch (error) {
+    if (error instanceof RequestError) return NextResponse.json({ error: error.message }, { status: error.status });
     console.error('Compression error:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
