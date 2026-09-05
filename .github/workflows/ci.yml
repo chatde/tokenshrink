@@ -20,5 +20,14 @@ jobs:
 
       - run: npm ci
 
+      # The existing lockfile was generated on macOS and omits this optional
+      # native binding. Install the exact version required by locked rolldown.
+      - name: Install Linux test runner binding
+        run: >-
+          node -e 'require("node:child_process").execFileSync("npm",
+          ["install", "--no-save", "--package-lock=false", "--ignore-scripts",
+          "--no-audit", "--no-fund", "@rolldown/binding-linux-x64-gnu@" +
+          require("./node_modules/rolldown/package.json").version], {stdio:"inherit"})'
+
       - name: Run tests
         run: npm test
