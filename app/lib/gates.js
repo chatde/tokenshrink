@@ -1,6 +1,6 @@
 import { db } from '@/app/lib/db';
 import { usageMeters, subscriptions } from '@/schema/schema';
-import { eq, and } from 'drizzle-orm';
+import { eq, and, gt } from 'drizzle-orm';
 import { getCurrentPeriod } from '@/app/lib/billing';
 
 export const FREE_TIER_CALL_LIMIT = 500;
@@ -17,6 +17,7 @@ export async function getCompressionTier(userId) {
     .where(and(
       eq(subscriptions.userId, userId),
       eq(subscriptions.status, 'active'),
+      gt(subscriptions.currentPeriodEnd, new Date()),
     ))
     .limit(1);
 

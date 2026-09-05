@@ -8,13 +8,15 @@ export default function UpgradeButton() {
   const { data: session } = useSession();
   const router = useRouter();
   const [loading, setLoading] = useState(false);
-  const [billing, setBilling] = useState('annual');
+  const [error, setError] = useState('');
+  const [billing, setBilling] = useState('monthly');
 
   const handleUpgrade = async () => {
     if (!session) {
       router.push('/login?next=/pricing');
       return;
     }
+    setError('');
     setLoading(true);
     try {
       const plan = billing === 'annual' ? 'advanced_annual' : 'advanced';
@@ -24,11 +26,12 @@ export default function UpgradeButton() {
         body: JSON.stringify({ plan }),
       });
       const data = await res.json();
+      if (!res.ok || !data.url) throw new Error(data.error || 'Checkout is unavailable. Please try again.');
       if (data.url) {
         window.location.href = data.url;
       }
     } catch (e) {
-      alert('Something went wrong. Please try again.');
+      setError(e.message || 'Something went wrong. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -36,6 +39,7 @@ export default function UpgradeButton() {
 
   return (
     <div className="mt-8 space-y-3">
+      {error && <p role="alert" className="text-sm text-red-400">{error}</p>}
       {/* Billing toggle */}
       <div className="flex rounded-lg border border-border overflow-hidden text-xs font-medium">
         <button

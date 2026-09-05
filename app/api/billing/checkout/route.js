@@ -2,13 +2,13 @@ import { checkRateLimit, rateLimitResponse } from '@/app/lib/rate-limit';
 import { NextResponse } from 'next/server';
 import { auth } from '@/app/lib/auth';
 import { db } from '@/app/lib/db';
-import { users } from '@/schema/schema';
-import { eq } from 'drizzle-orm';
+import { users, subscriptions } from '@/schema/schema';
+import { eq, and, inArray } from 'drizzle-orm';
 import { getStripe } from '@/app/lib/stripe';
 
 const PRICE_MAP = {
   advanced: process.env.STRIPE_ADVANCED_PRICE_ID,
-  advanced_annual: process.env.STRIPE_ADVANCED_ANNUAL_PRICE_ID,
+  advanced_annual: process.env.STRIPE_ADVANCED_ANNUAL_PRICE_ID || process.env.STRIPE_ADVANCED_PRICE_ID_ANNUAL,
 };
 
 export async function POST(request) {
@@ -50,6 +50,11 @@ export async function POST(request) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
 
+    const existing = await db.select({ id: subscriptions.id }).from(subscriptions)
+      .where(and(eq(subscriptions.userId, session.user.id), inArray(subscriptions.status, ['active', 'trialing', 'past_due']))).limit(1);
+    if (existing.length) {
+      return NextResponse.json({ error: 'An existing subscription must be managed in the billing portal' }, { status: 409 });
+    }
     let customerId = dbUser[0].stripeCustomerId;
 
     if (!customerId) {
@@ -77,8 +82,9 @@ export async function POST(request) {
         success_url: `${process.env.NEXTAUTH_URL}/dashboard?upgraded=true`,
         cancel_url: `${process.env.NEXTAUTH_URL}/pricing`,
         metadata: { userId: session.user.id, plan },
+        subscription_data: { metadata: { userId: session.user.id, plan } },
       },
-      { idempotencyKey: `checkout-${session.user.id}-${plan}-${Date.now()}` },
+      { idempotencyKey: `checkout-${session.user.id}-${plan}-${Math.floor(Date.now() / 300000)}` },
     );
 
     return NextResponse.json({ url: checkoutSession.url });

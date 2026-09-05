@@ -7,7 +7,7 @@ const MIN_TOKENS_PER_DAY = 1_000;
 const MAX_TOKENS_PER_DAY = 1_000_000;
 const STEP = 1_000;
 const COMPRESSION_RATE = 0.22;
-const GPT_4O_INPUT_COST_PER_MILLION = 5;
+const ILLUSTRATIVE_INPUT_COST_PER_MILLION = 5;
 const DAYS_PER_MONTH = 30;
 const ADVANCED_MONTHLY_PRICE = 5;
 
@@ -40,7 +40,7 @@ export default function SavingsCalculator() {
 
   const tokensSavedPerDay = Math.round(safeTokensPerDay * COMPRESSION_RATE);
   const monthlyCost =
-    (safeTokensPerDay / 1_000_000) * GPT_4O_INPUT_COST_PER_MILLION * DAYS_PER_MONTH;
+    (safeTokensPerDay / 1_000_000) * ILLUSTRATIVE_INPUT_COST_PER_MILLION * DAYS_PER_MONTH;
   const monthlySavings = monthlyCost * COMPRESSION_RATE;
   const paybackDays = monthlySavings > 0
     ? Math.ceil((ADVANCED_MONTHLY_PRICE / monthlySavings) * DAYS_PER_MONTH)
@@ -57,7 +57,7 @@ export default function SavingsCalculator() {
             See what 22% prompt compression is worth
           </h2>
           <p className="mt-2 text-sm text-text-secondary">
-            Based on GPT-4o input pricing at $5 per 1M tokens and a 30-day month.
+            Illustration only: assumes $5 per 1M input tokens, 22% savings, and 30 days. These are not measured savings or a current provider price.
           </p>
         </div>
 

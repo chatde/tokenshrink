@@ -151,20 +151,20 @@ const res = await openai.chat.completions.create({
               {[
                 {
                   name: 'Phrase compression',
-                  savings: '5-15%',
+                  savings: 'Variable',
                   desc: 'Removes filler words and replaces verbose phrases with concise alternatives. Runs automatically on every prompt — no configuration needed.',
                   example: '"I would like you to please make sure to check the file" → "check the file"',
                 },
                 {
                   name: 'Domain compression',
-                  savings: '10-25%',
+                  savings: 'Experimental',
                   desc: 'Auto-detects your tech stack from package.json and applies domain-specific abbreviations. Supports React, Node.js, Python, Supabase, SQL, TypeScript, Docker, Tailwind.',
                   example: '"useCallback" → "UCB", "getServerSideProps" → "SSP"',
                 },
                 {
                   name: 'Session vocabulary',
-                  savings: '15-35%',
-                  desc: 'Advanced feature. At session start, builds a project-specific codebook. Both you and the AI use the same abbreviations. Cost is paid once, amortized across every message.',
+                  savings: 'Experimental',
+                  desc: 'Local integration experiment. At session start, builds a project-specific codebook. Both you and the AI use the same abbreviations. Cost is paid once, amortized across every message.',
                   example: '"/Volumes/AI-Models/" → "SSD/" on every prompt, forever',
                 },
               ].map(({ name, savings, desc, example }) => (

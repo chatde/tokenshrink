@@ -1,104 +1,70 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/app/lib/db';
-import { users, subscriptions } from '@/schema/schema';
-import { eq } from 'drizzle-orm';
+import { users } from '@/schema/schema';
+import { eq, sql } from 'drizzle-orm';
 import { getStripe } from '@/app/lib/stripe';
+import { subscriptionState } from '@/app/lib/subscription-state';
+
+const SUBSCRIPTION_EVENTS = new Set([
+  'customer.subscription.created', 'customer.subscription.updated', 'customer.subscription.deleted',
+]);
 
 export async function POST(request) {
+  const stripe = getStripe();
+  if (!stripe) return NextResponse.json({ error: 'Billing unavailable' }, { status: 503 });
+  let event;
   try {
-    const stripe = getStripe();
-    if (!stripe) {
-      return NextResponse.json({ error: 'Billing unavailable' }, { status: 503 });
-    }
+    event = stripe.webhooks.constructEvent(await request.text(), request.headers.get('stripe-signature'), process.env.STRIPE_WEBHOOK_SECRET);
+  } catch {
+    return NextResponse.json({ error: 'Invalid signature' }, { status: 400 });
+  }
+  try {
+    const object = event.data.object;
+    const checkout = event.type === 'checkout.session.completed';
+    if (!checkout && !SUBSCRIPTION_EVENTS.has(event.type)) return NextResponse.json({ received: true });
+    const subscriptionId = checkout
+      ? (typeof object.subscription === 'string' ? object.subscription : object.subscription?.id)
+      : object.id;
+    if (!subscriptionId) return NextResponse.json({ received: true });
+    // Fetch current state, rather than trusting delayed/out-of-order event payloads.
+    const subscription = await stripe.subscriptions.retrieve(subscriptionId);
+    const state = subscriptionState(subscription);
+    if (!state) return NextResponse.json({ received: true });
+    const customerId = typeof subscription.customer === 'string' ? subscription.customer : subscription.customer?.id;
+    const records = await db.select({ id: users.id }).from(users).where(eq(users.stripeCustomerId, customerId)).limit(1);
+    if (!records.length) throw new Error('Subscription customer is not linked');
+    const userId = records[0].id;
 
-    const body = await request.text();
-    const sig = request.headers.get('stripe-signature');
-
-    let event;
-    try {
-      event = stripe.webhooks.constructEvent(body, sig, process.env.STRIPE_WEBHOOK_SECRET);
-    } catch (err) {
-      console.error('Webhook signature verification failed:', err.message);
-      return NextResponse.json({ error: 'Invalid signature' }, { status: 400 });
-    }
-
-    switch (event.type) {
-      case 'checkout.session.completed': {
-        const session = event.data.object;
-        const { userId, plan } = session.metadata;
-
-        if (userId && plan) {
-          await db
-            .update(users)
-            .set({ plan, updatedAt: new Date() })
-            .where(eq(users.id, userId));
-
-          if (session.subscription) {
-            const sub = await stripe.subscriptions.retrieve(session.subscription);
-            await db
-              .insert(subscriptions)
-              .values({
-                userId,
-                stripeSubscriptionId: session.subscription,
-                status: sub.status,
-                currentPeriodStart: new Date(sub.current_period_start * 1000),
-                currentPeriodEnd: new Date(sub.current_period_end * 1000),
-              })
-              .onConflictDoUpdate({
-                target: subscriptions.userId,
-                set: {
-                  stripeSubscriptionId: session.subscription,
-                  status: sub.status,
-                  currentPeriodStart: new Date(sub.current_period_start * 1000),
-                  currentPeriodEnd: new Date(sub.current_period_end * 1000),
-                  updatedAt: new Date(),
-                },
-              });
-          }
-        }
-        break;
-      }
-
-      case 'customer.subscription.updated': {
-        const sub = event.data.object;
-        await db
-          .update(subscriptions)
-          .set({
-            status: sub.status,
-            currentPeriodStart: new Date(sub.current_period_start * 1000),
-            currentPeriodEnd: new Date(sub.current_period_end * 1000),
-            updatedAt: new Date(),
-          })
-          .where(eq(subscriptions.stripeSubscriptionId, sub.id));
-        break;
-      }
-
-      case 'customer.subscription.deleted': {
-        const sub = event.data.object;
-        const subRecord = await db
-          .select()
-          .from(subscriptions)
-          .where(eq(subscriptions.stripeSubscriptionId, sub.id))
-          .limit(1);
-
-        if (subRecord.length > 0) {
-          await db
-            .update(users)
-            .set({ plan: 'free', updatedAt: new Date() })
-            .where(eq(users.id, subRecord[0].userId));
-
-          await db
-            .update(subscriptions)
-            .set({ status: 'canceled', updatedAt: new Date() })
-            .where(eq(subscriptions.stripeSubscriptionId, sub.id));
-        }
-        break;
-      }
-    }
-
+    // One SQL statement makes event deduplication, subscription state and plan
+    // updates atomic. A failed statement is retried by Stripe without lost events.
+    await db.execute(sql`
+      WITH accepted AS (
+        INSERT INTO stripe_webhook_events (id) VALUES (${event.id})
+        ON CONFLICT (id) DO NOTHING RETURNING id
+      ), synced AS (
+        INSERT INTO subscriptions
+          (id, user_id, stripe_subscription_id, status, current_period_start, current_period_end, last_stripe_event_created)
+        SELECT ${crypto.randomUUID()}, ${userId}, ${subscription.id}, ${state.status},
+          ${state.currentPeriodStart}, ${state.currentPeriodEnd}, ${event.created}
+        FROM accepted
+        ON CONFLICT (user_id) DO UPDATE SET
+          stripe_subscription_id = EXCLUDED.stripe_subscription_id,
+          status = EXCLUDED.status,
+          current_period_start = EXCLUDED.current_period_start,
+          current_period_end = EXCLUDED.current_period_end,
+          last_stripe_event_created = EXCLUDED.last_stripe_event_created,
+          updated_at = NOW()
+        WHERE subscriptions.last_stripe_event_created <= EXCLUDED.last_stripe_event_created
+          AND (subscriptions.stripe_subscription_id = EXCLUDED.stripe_subscription_id
+            OR EXCLUDED.status = 'active')
+        RETURNING user_id
+      )
+      UPDATE users SET plan = ${state.plan}, updated_at = NOW()
+      WHERE id IN (SELECT user_id FROM synced)
+    `);
     return NextResponse.json({ received: true });
-  } catch (error) {
-    console.error('Billing webhook error:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+  } catch {
+    console.error('Stripe subscription synchronization failed');
+    return NextResponse.json({ error: 'Subscription synchronization failed' }, { status: 500 });
   }
 }

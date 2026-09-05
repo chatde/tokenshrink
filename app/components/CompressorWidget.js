@@ -240,9 +240,11 @@ export default function CompressorWidget() {
       {/* Results */}
       {result && (
         <div className="mt-8 animate-slide-up">
-          {result.stats.tooShort || result.stats.belowThreshold ? (
+          {result.stats.protectedContent || result.stats.tooShort || result.stats.belowThreshold ? (
             <div className="p-4 bg-bg-card border border-border rounded-lg text-text-secondary text-sm">
-              {result.stats.tooShort
+              {result.stats.protectedContent
+                ? 'This prompt contains code or quoted text. It has been left unchanged to preserve exact content.'
+                : result.stats.tooShort
                 ? 'This text is too short for compression. Try a longer prompt (30+ words) for meaningful savings.'
                 : 'Compression savings are minimal for this text. Try a longer prompt with more natural language.'}
             </div>
@@ -251,7 +253,7 @@ export default function CompressorWidget() {
               {/* Savings banner with animated counter */}
               <div className="text-center mb-6">
                 <div className="text-3xl font-bold text-savings animate-pulse-savings">
-                  <AnimatedNumber value={result.stats.tokensSaved} suffix=" tokens saved" />
+                  <AnimatedNumber value={result.stats.tokensSaved} suffix=" estimated tokens saved" />
                 </div>
                 <div className="text-sm text-text-muted mt-1">
                   {result.stats.ratio}x compression &middot; {result.stats.originalTokens.toLocaleString()} &rarr; {result.stats.totalCompressedTokens.toLocaleString()} tokens
@@ -262,7 +264,7 @@ export default function CompressorWidget() {
                     <span>~${((result.stats.tokensSaved / 1000000) * 2.5 * 1000).toFixed(2)}/1K requests</span>
                     <span>·</span>
                     <span>~${((result.stats.tokensSaved / 1000000) * 2.5 * 100000).toFixed(0)}/100K requests</span>
-                    <span className="text-text-secondary">(GPT-4o input pricing)</span>
+                    <span className="text-text-secondary">(illustrative $2.50 / 1M input tokens)</span>
                   </div>
                 )}
               </div>

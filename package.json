@@ -1,10 +1,10 @@
 {
   "name": "tokenshrink",
-  "version": "1.0.0",
-  "description": "Same AI, fewer tokens. Free forever. — tokenshrink.com",
+  "version": "2.2.0",
+  "description": "Same AI, fewer tokens. Free forever. \u2014 tokenshrink.com",
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "next build --webpack",
     "start": "next start",
     "test": "vitest run",
     "test:watch": "vitest",

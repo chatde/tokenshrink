@@ -340,9 +340,11 @@ function DashboardContent() {
 }
 
 export default function DashboardPage() {
+  const { data: session } = useSession();
   return (
     <>
       <Navbar />
+      {session?.user?.isAdmin && <div className="pt-28 px-6"><Link href="/dashboard/operations" className="text-savings underline">Usage board & feedback inbox</Link></div>}
       <main className="pt-[88px] px-6">
         <Suspense fallback={
           <div className="max-w-4xl mx-auto py-20 text-center text-text-muted">

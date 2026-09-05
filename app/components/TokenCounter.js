@@ -1,31 +1,25 @@
-// Server component — fetches npm download count and estimates tokens saved
-// Revalidates hourly via Next.js fetch cache
-import AnimatedCount from './AnimatedCount';
-
+// Public npm downloads are installs, not unique people or measured token savings.
 export default async function TokenCounter() {
-  let tokensSaved = 1_200_000; // fallback if npm API fails (~240 downloads × 5000)
-
+  let downloads = null;
+  let period = '';
   try {
-    const res = await fetch(
-      'https://api.npmjs.org/downloads/point/2021-01-01:2030-12-31/tokenshrink',
-      { next: { revalidate: 3600 } }
-    );
-    if (res.ok) {
-      const data = await res.json();
-      const downloads = data.downloads ?? 0;
-      tokensSaved = downloads * 5000;
+    const response = await fetch('https://api.npmjs.org/downloads/point/last-month/tokenshrink', {
+      next: { revalidate: 3600 }, signal: AbortSignal.timeout(5000),
+    });
+    if (response.ok) {
+      const data = await response.json();
+      if (Number.isSafeInteger(data.downloads) && data.downloads >= 0) {
+        downloads = data.downloads;
+        period = `${data.start} – ${data.end}`;
+      }
     }
-  } catch {
-    // fetch failed — use baseline
-  }
-
+  } catch { /* No invented fallback when the registry is unavailable. */ }
   return (
-    <div className="savings-glow border border-savings/15 rounded-xl p-5 text-center bg-bg-card">
+    <div className="border border-savings/15 rounded-xl p-5 text-center bg-bg-card">
       <div className="text-savings/40 text-lg mb-2 font-mono">◉</div>
-      <div className="text-2xl font-bold text-savings font-mono">
-        <AnimatedCount initial={tokensSaved} />
-      </div>
-      <div className="text-xs text-text-muted mt-1">tokens saved</div>
+      <div className="text-2xl font-bold text-savings font-mono">{downloads === null ? 'Unavailable' : downloads.toLocaleString('en-US')}</div>
+      <div className="text-xs text-text-muted mt-1">npm downloads · reported month</div>
+      <p className="text-xs text-text-muted mt-1">{period || 'Registry data could not be loaded'}</p>
     </div>
   );
 }

@@ -1,0 +1,18 @@
+import { it, expect, vi, beforeEach } from 'vitest';
+const m=vi.hoisted(()=>({admin:vi.fn(),execute:vi.fn(),rate:vi.fn()}));
+vi.mock('@/app/lib/admin',()=>({requireAdmin:m.admin}));
+vi.mock('@/app/lib/db',()=>({db:{execute:m.execute}}));
+vi.mock('@/app/lib/rate-limit',()=>({checkRateLimit:m.rate,rateLimitResponse:()=>new Response('{}',{status:429})}));
+import { POST } from '../app/api/feedback/route.js';
+import { GET } from '../app/api/admin/board/route.js';
+import { PATCH } from '../app/api/admin/feedback/[id]/route.js';
+beforeEach(()=>{vi.clearAllMocks();m.admin.mockResolvedValue(null);m.execute.mockResolvedValue({rows:[{id:'ok'}]});m.rate.mockResolvedValue({allowed:true})});
+const req=(body,origin='https://example.test')=>new Request('https://example.test/api/feedback',{method:'POST',headers:{'Content-Type':'application/json',origin},body:JSON.stringify(body)});
+it('saves valid feedback without requiring an account',async()=>{const r=await POST(req({message:'Please add a Python example.',category:'idea'}));expect(r.status).toBe(201);expect((await r.json()).id).toMatch(/^[0-9a-f-]{36}$/);expect(m.execute).toHaveBeenCalledOnce()});
+it.each([null,{message:'short',category:'bug'},{message:'x'.repeat(2001),category:'bug'},{message:'a valid length message',category:'admin'}])('rejects invalid feedback %j',async body=>{expect((await POST(req(body))).status).toBe(400);expect(m.execute).not.toHaveBeenCalled()});
+it('does not acknowledge unsaved feedback',async()=>{m.execute.mockRejectedValue(new Error('offline'));expect((await POST(req({message:'Please add a Python example.',category:'idea'}))).status).toBe(503)});
+it('blocks non-admin usage requests before querying data',async()=>{expect((await GET()).status).toBe(403);expect(m.execute).not.toHaveBeenCalled()});
+it('blocks non-admin status changes',async()=>{expect((await PATCH(req({}),{params:Promise.resolve({id:crypto.randomUUID()})})).status).toBe(403);expect(m.execute).not.toHaveBeenCalled()});
+it('blocks cross-origin admin mutations',async()=>{m.admin.mockResolvedValue({user:{id:'admin'}});expect((await PATCH(req({},'https://other.test'),{params:Promise.resolve({id:crypto.randomUUID()})})).status).toBe(403)});
+it('requires a resolution before marking resolved',async()=>{m.admin.mockResolvedValue({user:{id:'admin'}});expect((await PATCH(req({status:'resolved',resolution:''}),{params:Promise.resolve({id:crypto.randomUUID()})})).status).toBe(400)});
+it('saves reviewed status and resolution',async()=>{m.admin.mockResolvedValue({user:{id:'admin'}});expect((await PATCH(req({status:'resolved',resolution:'Fixed in the SDK release.'}),{params:Promise.resolve({id:crypto.randomUUID()})})).status).toBe(200);expect(m.execute).toHaveBeenCalledOnce()});

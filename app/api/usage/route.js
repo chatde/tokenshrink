@@ -54,7 +54,7 @@ export async function GET(request) {
         history: usage,
         recentCompressions,
       },
-      { headers: { 'Cache-Control': 's-maxage=60, stale-while-revalidate=300' } },
+      { headers: { 'Cache-Control': 'private, no-store' } },
     );
   } catch (error) {
     console.error('Usage route error:', error);

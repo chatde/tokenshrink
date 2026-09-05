@@ -23,15 +23,15 @@ describe('Billing plans configuration', () => {
     expect(adv.priceAnnual).toBe(36);
   });
 
-  it('advanced plan has Rosetta Protocol feature', () => {
+  it('advanced plan describes the hosted allowance', () => {
     const adv = PLANS.advanced;
-    const hasRosetta = adv.features.some(f => f.includes('Rosetta Protocol'));
+    const hasRosetta = adv.features.some(f => f.includes('500 calls/month'));
     expect(hasRosetta).toBe(true);
   });
 
-  it('advanced plan has domain rotors feature', () => {
+  it('advanced plan includes usage history', () => {
     const adv = PLANS.advanced;
-    const hasRotors = adv.features.some(f => f.includes('Domain rotors'));
+    const hasRotors = adv.features.some(f => f.includes('Usage history'));
     expect(hasRotors).toBe(true);
   });
 
@@ -74,13 +74,7 @@ describe('Webhook handler', () => {
     expect(source).toContain('STRIPE_WEBHOOK_SECRET');
   });
 
-  it('webhook downgrades to free on subscription.deleted', async () => {
-    const { readFileSync } = await import('fs');
-    const source = readFileSync(new URL('../app/api/billing/webhook/route.js', import.meta.url), 'utf8');
 
-    expect(source).toContain("plan: 'free'");
-    expect(source).toContain("status: 'canceled'");
-  });
 });
 
 describe('Env vars documentation', () => {

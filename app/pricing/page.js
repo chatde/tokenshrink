@@ -5,7 +5,7 @@ import SavingsCalculator from './SavingsCalculator';
 
 export const metadata = {
   title: 'Pricing — TokenShrink',
-  description: 'TokenShrink Free is free forever. TokenShrink Advanced unlocks the Rosetta Protocol — negotiated session cipher, domain rotors, and cross-session learning.',
+  description: 'Free open-source SDK. Advanced hosted compression for $5/month or $36/year. Savings vary by workload.',
 };
 
 const CHECK = (
@@ -21,27 +21,18 @@ const DASH = (
 );
 
 const FREE_FEATURES = [
-  { label: 'Web compressor', included: true },
-  { label: 'Unlimited compressions', included: true },
-  { label: 'API access + SDK', included: true },
-  { label: 'All LLM providers supported', included: true },
-  { label: 'Usage dashboard', included: true },
+  { label: 'Web compressor and open-source SDK', included: true },
+  { label: 'API keys and usage dashboard', included: true },
+  { label: '500 full-compression API calls/month when signed in', included: true },
+  { label: 'Basic compression after the monthly allowance', included: true },
   { label: 'No sign-up required to try', included: true },
-  { label: 'Rosetta Protocol (Enigma codec)', included: false },
-  { label: 'Domain rotors (React / Node / Python / Supabase)', included: false },
-  { label: 'Sub-agent vocab inheritance', included: false },
-  { label: 'Cross-session learning', included: false },
 ];
-
 const ADVANCED_FEATURES = [
   { label: 'Everything in Free', included: true },
-  { label: 'Rosetta Protocol — session cipher that compresses using your project vocab', included: true },
-  { label: 'Session codebook — codec negotiated once, applied to every message', included: true },
-  { label: 'Domain rotors — auto-loads React / Node / Python / Supabase vocab packs', included: true },
-  { label: 'Sub-agent vocab inheritance — all agents share the same cipher', included: true },
-  { label: 'Cross-session learning — frequent terms promoted, dead weight pruned', included: true },
-  { label: 'Compaction-safe — Rosetta re-injects if context window resets', included: true },
-  { label: 'Advanced usage dashboard with dollar savings', included: true },
+  { label: 'Full hosted compression beyond 500 calls/month', included: true },
+  { label: 'Usage history and estimated savings dashboard', included: true },
+  { label: '30 requests/minute; 100,000 words/request', included: true },
+  { label: 'Cancel through your billing portal', included: true },
 ];
 
 export default function PricingPage() {
@@ -53,7 +44,7 @@ export default function PricingPage() {
           <div className="text-center mb-12">
             <h1 className="text-3xl font-bold text-text">Simple pricing</h1>
             <p className="text-text-secondary mt-2">
-              Free forever for phrase compression. Advanced unlocks the Enigma machine.
+              Use the SDK free. Upgrade for continued full hosted compression.
             </p>
           </div>
 
@@ -94,7 +85,7 @@ export default function PricingPage() {
             <div className="rounded-xl border border-savings/40 bg-savings/5 p-8 flex flex-col relative">
               <div className="absolute -top-3 left-1/2 -translate-x-1/2">
                 <span className="bg-savings text-bg text-xs font-semibold px-3 py-1 rounded-full">
-                  The Enigma Machine
+                  Hosted Advanced
                 </span>
               </div>
 
@@ -123,39 +114,6 @@ export default function PricingPage() {
           </div>
         </section>
 
-        {/* What is the Rosetta Protocol */}
-        <section className="px-6 py-16 border-t border-border">
-          <div className="max-w-2xl mx-auto text-center mb-10">
-            <h2 className="text-xl font-bold text-text">What is the Rosetta Protocol?</h2>
-            <p className="text-sm text-text-secondary mt-3 leading-relaxed">
-              The Enigma Machine concept: at session start, Claude and you negotiate a shared codebook — a compressed cipher
-              built from your actual project&apos;s vocabulary. Every subsequent message is compressed using that cipher.
-              The cost is paid once, amortized across every message in the session.
-            </p>
-          </div>
-          <div className="max-w-3xl mx-auto grid md:grid-cols-3 gap-4">
-            {[
-              {
-                title: 'Domain Rotors',
-                body: 'Auto-detects your stack from package.json. React, Node, Python, Supabase vocab packs load automatically — 88 terms across 4 domains.',
-              },
-              {
-                title: 'Cross-Session Learning',
-                body: 'Terms that fire frequently across sessions get promoted to the Hall of Fame. Dead weight gets pruned. The codec improves every session.',
-              },
-              {
-                title: 'Compaction-Safe',
-                body: 'Context window resets? The Rosetta block is re-injected automatically. Sub-agents inherit the session vocab. The cipher never drops.',
-              },
-            ].map(({ title, body }) => (
-              <div key={title} className="bg-bg-card border border-border rounded-xl p-5">
-                <h3 className="text-sm font-semibold text-text mb-2">{title}</h3>
-                <p className="text-xs text-text-secondary leading-relaxed">{body}</p>
-              </div>
-            ))}
-          </div>
-        </section>
-
         {/* FAQ */}
         <section className="px-6 py-16 border-t border-border">
           <div className="max-w-2xl mx-auto">
@@ -170,15 +128,15 @@ export default function PricingPage() {
                 },
                 {
                   q: 'What does Advanced add on top of Free?',
-                  a: 'The Rosetta Protocol — a negotiated session cipher. At session start, a codebook is built from your project vocabulary. Every message is then compressed using that cipher. Advanced also includes domain rotors (tech-stack vocab packs), sub-agent vocab inheritance, and cross-session learning that improves the codec over time.',
+                  a: 'Advanced keeps full hosted compression available after 500 signed-in API calls per month. The SDK remains free; local codebook experiments are not a paid hosted feature.',
                 },
                 {
                   q: 'Does compression affect AI response quality?',
-                  a: 'No. We prepend a tiny decoder header that teaches the LLM our abbreviations. The AI understands the compressed prompt just as well as the original. For prompts under 30 words, we skip compression entirely.',
+                  a: 'It can. Compression rewrites text, so evaluate answer quality on your own tasks. Detected code and quoted literals are left unchanged. Savings are estimates unless you provide the matching tokenizer.',
                 },
                 {
                   q: 'What AI providers does it work with?',
-                  a: 'All of them. OpenAI, Anthropic, Google, Mistral, Llama, Cohere — any LLM that accepts text prompts. Our SDK has first-class support for OpenAI and Anthropic.',
+                  a: 'All of them. OpenAI, Anthropic, Google, Mistral, Llama, Cohere — any LLM that accepts text prompts. Pass the returned text to your provider and evaluate the result.',
                 },
                 {
                   q: 'Do you store my prompts?',

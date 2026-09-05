@@ -1,4 +1,4 @@
-const { pgTable, text, integer, timestamp, real, varchar, uniqueIndex, index } = require('drizzle-orm/pg-core');
+const { pgTable, text, integer, timestamp, real, varchar, uniqueIndex, index, bigint } = require('drizzle-orm/pg-core');
 const { sql } = require('drizzle-orm');
 
 const users = pgTable('users', {
@@ -46,6 +46,7 @@ const subscriptions = pgTable('subscriptions', {
   id: text('id').primaryKey().$defaultFn(() => crypto.randomUUID()),
   userId: text('user_id').notNull().references(() => users.id).unique(),
   stripeSubscriptionId: text('stripe_subscription_id').notNull().unique(),
+  lastStripeEventCreated: integer('last_stripe_event_created').notNull().default(0),
   status: text('status').notNull(),
   currentPeriodStart: timestamp('current_period_start'),
   currentPeriodEnd: timestamp('current_period_end'),
@@ -73,4 +74,25 @@ const rateLimits = pgTable('rate_limits', {
   index('rate_limits_expires_idx').on(table.expiresAt),
 ]);
 
-module.exports = { users, apiKeys, compressions, subscriptions, usageMeters, rateLimits };
+const analyticsEvents = pgTable('analytics_events', {
+  id: bigint('id', { mode: 'number' }).primaryKey().generatedAlwaysAsIdentity(),
+  event: text('event').notNull(),
+  beforeTokens: integer('before_tokens').notNull(),
+  afterTokens: integer('after_tokens').notNull(),
+  savedTokens: integer('saved_tokens').notNull(),
+  source: varchar('source', { length: 64 }).notNull(),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+}, table => [index('analytics_events_created_idx').on(table.createdAt)]);
+
+const stripeWebhookEvents = pgTable('stripe_webhook_events', {
+  id: text('id').primaryKey(),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+});
+
+const feedback = pgTable('feedback', {
+  id: text('id').primaryKey(), category: text('category').notNull(), message: text('message').notNull(),
+  status: text('status').notNull().default('new'), summary: text('summary'), resolution: text('resolution').notNull().default(''),
+  createdAt: timestamp('created_at').defaultNow().notNull(), updatedAt: timestamp('updated_at').defaultNow().notNull(),
+}, table => [index('feedback_created_idx').on(table.createdAt)]);
+
+module.exports = { feedback, analyticsEvents, stripeWebhookEvents, users, apiKeys, compressions, subscriptions, usageMeters, rateLimits };

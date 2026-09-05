@@ -9,52 +9,18 @@ export const metadata = {
 
 const releases = [
   {
-    version: 'v3.0',
-    date: 'June 2026',
-    tag: 'Current',
+    version: 'Web reliability update', date: 'September 2026', tag: 'Current',
     highlights: [
-      'Huffman frequency compression — up to 28% token savings',
-      '51 tests passing with zero meaning loss',
-      'Advanced tier with Stripe billing',
-      'Savings calculator on pricing page',
-      'Security headers and @vercel/kv rate limiting',
-      'API error handling hardening across all routes',
+      'Quoted literals and detected code are conservatively left unchanged',
+      'Savings checks count the entire returned payload',
+      'Homepage reports npm downloads rather than estimated global savings',
+      'Analytics validation and subscription synchronization hardened',
+      'See npm for the currently published SDK version',
     ],
   },
   {
-    version: 'v2.1',
-    date: 'April 2026',
-    highlights: [
-      'New domain rotors: SQL, TypeScript, Docker, Tailwind CSS',
-      'Session vocabulary auto-generation on session start',
-      'Auto-detect Docker projects via filesystem signals',
-      'Prisma, Drizzle, TypeORM database ORM detection',
-    ],
-  },
-  {
-    version: 'v2.0',
-    date: 'March 2026',
-    highlights: [
-      'Token-aware compression — real token counts via cl100k_base lookup',
-      'SDK rewrite with drop-in npm package',
-      'Custom tokenizer support (bring your own gpt-tokenizer)',
-      'Domain rotors: React, Node.js, Python, Supabase auto-detection',
-      'Rosetta Protocol — negotiated session vocabulary',
-      'Sub-agent vocab inheritance for Claude Code',
-      'Compression strategies engine with phrase + domain + session layers',
-    ],
-  },
-  {
-    version: 'v1.0',
-    date: 'February 2026',
-    highlights: [
-      'Initial release — phrase compression engine',
-      'Web UI with live compressor widget',
-      'REST API with API key authentication',
-      'Claude Code hook integration',
-      'Basic usage dashboard',
-      'Open source on GitHub',
-    ],
+    version: 'SDK 2.0.0', date: 'February 2026',
+    highlights: ['Published token-aware compression SDK', 'Custom tokenizer support'],
   },
 ];
 

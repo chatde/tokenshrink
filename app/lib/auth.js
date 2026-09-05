@@ -49,6 +49,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 
         if (dbUser.length > 0) {
           session.user.id = dbUser[0].id;
+          session.user.isAdmin = (process.env.ADMIN_EMAILS || '').split(',').map(s => s.trim().toLowerCase()).filter(Boolean).includes(session.user.email.toLowerCase());
           session.user.plan = dbUser[0].plan;
           session.user.stripeCustomerId = dbUser[0].stripeCustomerId;
         }

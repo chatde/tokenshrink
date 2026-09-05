@@ -1,18 +1,10 @@
 'use client';
 
 const MESSAGE = [
-  '🚀 TokenShrink v3.0 is live',
-  '—',
-  'Up to 28% token savings',
-  '—',
-  'Huffman frequency compression',
-  '—',
-  'Advanced tier now available',
-  '—',
-  'Works with Claude · Gemini · GPT · Ollama',
-  '—',
-  'Zero meaning loss — 51 tests passing',
-  '—',
+  'TokenShrink — open-source prompt compression', '—',
+  'Measure savings on your own prompts', '—',
+  'Free SDK · Advanced hosted plan $5/month', '—',
+  'Review compressed output before use', '—',
 ].join('   ');
 
 // Duplicate for seamless loop

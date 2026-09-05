@@ -207,12 +207,37 @@ describe('Math accuracy', () => {
     }
   });
 
-  it('totalCompressedTokens = compressedTokens + rosettaTokens', () => {
+  it('totalCompressedTokens counts the returned payload', () => {
     const text = 'The comprehensive specification requires significant functionality. Additionally, the implementation needs consideration. It is important to validate everything. Please make sure to test thoroughly. In order to maintain quality, review carefully. Due to the fact that correctness matters, verify.';
     const result = compress(text);
 
     expect(result.stats.totalCompressedTokens).toBe(
-      result.stats.compressedTokens + result.stats.rosettaTokens
+      countTokens(result.compressed)
     );
+  });
+});
+
+
+describe('Token savings acceptance gate', () => {
+  const text = 'In order to build a good application, it is important to consider security. Please make sure to validate all inputs. Due to the fact that users matter, remember to handle errors. For the purpose of quality, review all code.';
+
+  it.each([100, 104, 96])('keeps original when candidate costs %i tokens versus 100 input tokens', (candidateTokens) => {
+    const tokenizer = (value) => value === text ? 100 : candidateTokens;
+    const result = compress(text, { tokenizer, analytics: false });
+    expect(result.compressed).toBe(text);
+    expect(result.stats.belowThreshold).toBe(true);
+    expect(result.stats.tokensSaved).toBe(0);
+  });
+
+  it('keeps original at exactly five percent savings', () => {
+    const result = compress(text, { tokenizer: value => value === text ? 100 : 95, analytics: false });
+    expect(result.compressed).toBe(text);
+    expect(result.stats.belowThreshold).toBe(true);
+  });
+
+  it('accepts a candidate saving more than five percent', () => {
+    const result = compress(text, { tokenizer: value => value === text ? 100 : 94, analytics: false });
+    expect(result.compressed).not.toBe(text);
+    expect(result.stats.tokensSaved).toBe(6);
   });
 });

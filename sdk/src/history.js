@@ -39,7 +39,7 @@ export function compressHistory(messages, options = {}) {
       return message;
     }
 
-    const result = compress(message.content);
+    const result = compress(message.content, { ...options, analytics: false });
 
     totalTokensBefore += result.stats.originalTokens;
     totalTokensAfter += result.stats.totalCompressedTokens;

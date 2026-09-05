@@ -17,7 +17,8 @@ export default function Navbar() {
           </span>
         </Link>
 
-        <div className="flex items-center gap-6">
+        <div className="flex items-center gap-3 md:gap-6 overflow-x-auto">
+          <Link href="/feedback" className="text-sm text-text-secondary hover:text-text">Feedback</Link>
           <Link
             href="/providers"
             className="text-sm text-text-secondary hover:text-text transition-colors"

@@ -31,12 +31,15 @@ export function compress(text, options = {}) {
     source = 'sdk',
     tier,
   } = options;
-  const originalText = text.trim();
+  // Conservatively leave literal-bearing prompts untouched. Rewriting quoted
+  // strings or code can change exact-output requirements and program behavior.
+  const protectedContent = /[`"“”]|(?:^|\s)'[^'\n]+'(?=\s|[.,;:!?]|$)|(?:^|\n)(?: {4}|\t)\S/.test(text);
+  const originalText = protectedContent ? text : text.trim();
   const originalWords = countWords(originalText);
   const originalTokens = countTokens(originalText, tokenizer);
 
   // Too short — compression overhead exceeds savings
-  if (originalWords < MIN_WORDS_FOR_COMPRESSION) {
+  if (protectedContent || originalWords < MIN_WORDS_FOR_COMPRESSION) {
     return {
       compressed: originalText,
       rosetta: '',
@@ -55,7 +58,7 @@ export function compress(text, options = {}) {
         dollarsSaved: 0,
         strategy: 'none',
         tokenizerUsed: typeof tokenizer === 'function' ? 'custom' : 'built-in',
-        tooShort: true,
+        ...(protectedContent ? { protectedContent: true } : { tooShort: true }),
       },
     };
   }
@@ -215,18 +218,18 @@ export function compress(text, options = {}) {
   const compressedWords = countWords(compressed);
   const compressedTokens = countTokens(compressed, tokenizer);
   const totalCompressedWords = compressedWords + rosettaWords;
-  const totalCompressedTokens = compressedTokens + rosettaTokens;
+  const fullCompressed = rosetta ? `${rosetta}\n\n${compressed}` : compressed;
+  // Token boundaries and separators make header/body counts non-additive.
+  const totalCompressedTokens = countTokens(fullCompressed, tokenizer);
 
   // Calculate savings (token-based)
   const tokenRatio = totalCompressedTokens > 0 ? originalTokens / totalCompressedTokens : 1;
   const tokensSaved = Math.max(0, originalTokens - totalCompressedTokens);
   const dollarsSaved = tokensToDollars(tokensSaved);
 
-  // Word-based ratio for backward compat threshold check
-  const wordRatio = totalCompressedWords > 0 ? originalWords / totalCompressedWords : 1;
-
-  // If savings are below threshold, return original
-  if (tokenRatio < (1 + MIN_SAVINGS_RATIO) && wordRatio < (1 + MIN_SAVINGS_RATIO)) {
+  // Fewer words do not guarantee fewer tokens. Require savings above 5%
+  // of the original token count, including the Rosetta overhead.
+  if (originalTokens <= 0 || tokensSaved <= originalTokens * MIN_SAVINGS_RATIO) {
     return {
       compressed: originalText,
       rosetta: '',
@@ -249,9 +252,6 @@ export function compress(text, options = {}) {
       },
     };
   }
-
-  // Combine rosetta + compressed text
-  const fullCompressed = rosetta ? `${rosetta}\n\n${compressed}` : compressed;
 
   // Ping analytics — only numbers, no prompt content, opt-out via options.analytics = false
   if (analytics && tokensSaved > 0) {

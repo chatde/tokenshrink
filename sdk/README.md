@@ -4,7 +4,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 [![Zero Dependencies](https://img.shields.io/badge/dependencies-0-brightgreen)](package.json)
 
-**Token-aware AI prompt compression — same results, fewer tokens.** Works with every LLM.
+**Token-aware AI prompt compression — measure savings before use.** Works with every LLM.
 
 Zero runtime dependencies. Pure JavaScript. Real token savings verified with cl100k_base.
 
@@ -221,3 +221,12 @@ If upgrading from v1.x:
 ## License
 
 [MIT](LICENSE)
+
+
+### Compression safety and measurement
+
+Compression is a heuristic rewrite, not a lossless encoding or a guarantee of unchanged model answers. Evaluate outputs on your own tasks. Prompts detected as containing code or quoted literals are conservatively returned unchanged, with `stats.protectedContent: true`; detection is not a complete parser of every language or literal syntax.
+
+Provide `tokenizer: text => encode(text).length` for the encoding used by your target model. Without it, counts are estimates. `totalCompressedTokens` measures the entire returned payload, including any decoder header and separators; separately tokenized header and body counts need not add to that total. Candidates must save more than 5% of original tokens to be accepted.
+
+The root package selects a browser-safe entry outside Node. Filesystem-backed codebook helpers are Node-only. `compressHistory` honors the same tokenizer and analytics options as `compress`.

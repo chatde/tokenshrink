@@ -10,7 +10,7 @@
 
 ---
 
-TokenShrink compresses your AI prompts so they use fewer tokens — same results, lower cost. Works with every LLM: OpenAI, Anthropic, Google, Mistral, Cohere, and more.
+TokenShrink compresses your AI prompts so they use fewer tokens — measure token savings on your own prompts. Works with every LLM: OpenAI, Anthropic, Google, Mistral, Cohere, and more.
 
 No LLM calls. No latency. Pure text compression that any model can understand.
 
@@ -137,7 +137,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for development details.
 ## Testing
 
 ```bash
-npm test          # run all 51 tests
+npm test          # run the regression suite
 npm run test:watch  # watch mode
 ```
 

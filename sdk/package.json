@@ -1,11 +1,15 @@
 {
   "name": "tokenshrink",
-  "version": "2.1.0",
-  "description": "Token-aware AI prompt compression — same results, fewer tokens. Works with every LLM.",
+  "version": "2.2.0",
+  "description": "Prompt compression with tokenizer-aware savings checks and conservative literal protection.",
   "type": "module",
   "main": "./src/index.js",
   "exports": {
-    ".": "./src/index.js"
+    ".": {
+      "node": "./src/index.js",
+      "default": "./src/browser.js"
+    },
+    "./codebook": "./src/codebook.js"
   },
   "files": [
     "src/",

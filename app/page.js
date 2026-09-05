@@ -53,15 +53,15 @@ export default function Home() {
               <p className="mt-4 text-lg text-text-secondary max-w-2xl mx-auto">
                 Your prompts are verbose. Your models don&apos;t need them to be.
                 <br />
-                TokenShrink compresses prompts — same results, fewer tokens. Works with Claude, GPT, Gemini, Ollama — any LLM.{' '}
+                TokenShrink compresses prompts — measure savings before use. Works with Claude, GPT, Gemini, Ollama — any LLM.{' '}
                 <a href="https://github.com/chatde/tokenshrink" target="_blank" rel="noopener noreferrer" className="text-savings hover:underline">Open source ↗</a>
               </p>
               <p className="mt-6 text-xs text-text-muted font-mono tracking-wide text-center">
-                Typical savings: <span className="text-savings">15-35%</span> on system prompts
+                Savings vary by prompt and tokenizer
                 <span className="hidden sm:inline"> · </span><br className="sm:hidden" />
                 Works with <span className="text-savings">8</span> AI providers
                 <span className="hidden sm:inline"> · </span><br className="sm:hidden" />
-                <span className="text-savings">51</span> tests passing
+                <span className="text-savings">Open-source</span> regression suite
               </p>
             </FadeIn>
           </div>
@@ -129,7 +129,7 @@ export default function Home() {
                 {
                   step: '03',
                   title: 'Use fewer tokens',
-                  desc: 'Use the compressed version in your API calls. Same AI quality, fewer tokens.',
+                  desc: 'Use the compressed version in your API calls. Review the output and measure savings with your model tokenizer.',
                 },
               ].map(({ step, title, desc }, i) => (
                 <FadeIn key={step} delay={i * 150}>
@@ -161,9 +161,9 @@ export default function Home() {
                 {
                   icon: '💰',
                   title: 'Cut API costs 20-35%',
-                  desc: 'Long system prompts for GPT-4, Claude, or Gemini compress significantly. One customer saved $120/month on a 50K-token daily pipeline.',
-                  stat: '$120/mo',
-                  statLabel: 'saved',
+                  desc: 'Try verbose system instructions with your own evaluation set. Compare token counts and answer quality before adoption.',
+                  stat: 'Evaluate',
+                  statLabel: 'your prompts',
                 },
                 {
                   icon: '⚡',
