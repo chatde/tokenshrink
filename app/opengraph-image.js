@@ -1,6 +1,6 @@
 import { ImageResponse } from 'next/og';
 
-export const runtime = 'edge';
+export const runtime = 'nodejs';
 export const alt = 'TokenShrink — Same AI, Fewer Tokens';
 export const size = { width: 1200, height: 630 };
 export const contentType = 'image/png';
@@ -63,11 +63,11 @@ export default function Image() {
           }}
         >
           <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <span style={{ color: '#10b981', fontWeight: 700 }}>~10%</span> token savings
+            <span style={{ color: '#10b981', fontWeight: 700 }}>Measured</span> savings
           </span>
           <span style={{ color: '#3f3f46' }}>|</span>
           <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <span style={{ color: '#10b981', fontWeight: 700 }}>&lt;1ms</span> processing
+            <span style={{ color: '#10b981', fontWeight: 700 }}>Local</span> SDK
           </span>
           <span style={{ color: '#3f3f46' }}>|</span>
           <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>

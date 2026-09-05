@@ -10,8 +10,8 @@ export default function Navbar() {
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 border-b border-border bg-bg/80 backdrop-blur-xl">
       <AnnouncementBanner />
-      <div className="max-w-6xl mx-auto px-6 h-14 flex items-center justify-between">
-        <Link href="/" className="flex items-center gap-1.5">
+      <div className="max-w-6xl mx-auto px-6 h-14 flex items-center justify-between gap-6">
+        <Link href="/" className="flex items-center gap-1.5 shrink-0">
           <span className="text-lg font-bold text-text">
             Token<span className="text-savings">Shrink</span>
           </span>
