@@ -2,8 +2,8 @@ import { NextResponse } from 'next/server';
 import { auth } from '@/app/lib/auth';
 import { db } from '@/app/lib/db';
 import { usageMeters, compressions } from '@/schema/schema';
-import { eq, desc } from 'drizzle-orm';
-import { getPlan, getCurrentPeriod } from '@/app/lib/billing';
+import { eq, desc, sql } from 'drizzle-orm';
+import { getPlan, getCurrentPeriod, tokensToDollars, AVG_COST_PER_1K_TOKENS } from '@/app/lib/billing';
 import { checkRateLimit, rateLimitResponse } from '@/app/lib/rate-limit';
 
 export async function GET(request) {
@@ -25,7 +25,7 @@ export async function GET(request) {
     const plan = getPlan(session.user.plan || 'free');
     const period = getCurrentPeriod();
 
-    const [usage, recentCompressions] = await Promise.all([
+    const [usage, recentCompressions, successful] = await Promise.all([
       db
         .select()
         .from(usageMeters)
@@ -38,6 +38,9 @@ export async function GET(request) {
         .where(eq(compressions.userId, userId))
         .orderBy(desc(compressions.createdAt))
         .limit(20),
+      db.execute(sql`SELECT count(*)::int AS count FROM compressions WHERE user_id=${userId}
+        AND tokens_saved>0 AND created_at>=${period+'-01'}::timestamp
+        AND created_at<${period+'-01'}::timestamp+interval '1 month'`),
     ]);
 
     const currentUsage = usage.find((u) => u.period === period);
@@ -46,12 +49,15 @@ export async function GET(request) {
       {
         plan: session.user.plan || 'free',
         currentPeriod: period,
+        generatedAt: new Date().toISOString(),
+        successfulCompressionCount: successful.rows[0].count,
         wordsUsed: currentUsage?.wordsProcessed || 0,
         wordsLimit: plan.wordsPerMonth,
         compressionCount: currentUsage?.compressionCount || 0,
         tokensSaved: currentUsage?.tokensSaved || 0,
-        dollarsSaved: currentUsage?.dollarsSaved || 0,
-        history: usage,
+        dollarsSaved: tokensToDollars(currentUsage?.tokensSaved || 0),
+        costAssumptionUsdPerMillion: AVG_COST_PER_1K_TOKENS * 1000,
+        history: usage.map(row => ({ ...row, dollarsSaved: tokensToDollars(row.tokensSaved) })),
         recentCompressions,
       },
       { headers: { 'Cache-Control': 'private, no-store' } },

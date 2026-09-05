@@ -45,7 +45,6 @@ export function getPlan(planId) {
   return PLANS[planId] || PLANS.free;
 }
 
-export function getCurrentPeriod() {
-  const now = new Date();
-  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+export function getCurrentPeriod(now = new Date()) {
+  return now.toISOString().slice(0, 7);
 }

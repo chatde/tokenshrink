@@ -2,7 +2,8 @@
 
 import { Suspense } from 'react';
 import { useSession } from 'next-auth/react';
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
+import { useLiveRefresh } from '@/app/lib/use-live-refresh';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Navbar from '../components/Navbar';
@@ -12,6 +13,8 @@ function DashboardContent() {
   const router = useRouter();
   const [usage, setUsage] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [usageError, setUsageError] = useState('');
+  const pendingUsage = useRef(false);
   const [keys, setKeys] = useState([]);
   const [keysLoading, setKeysLoading] = useState(true);
   const [newKeyLabel, setNewKeyLabel] = useState('');
@@ -27,15 +30,18 @@ function DashboardContent() {
     }
   }, [status, router]);
 
-  useEffect(() => {
-    if (session) {
-      fetch('/api/usage')
-        .then((r) => r.json())
-        .then(setUsage)
-        .catch(console.error)
-        .finally(() => setLoading(false));
-    }
-  }, [session]);
+  const refreshUsage = useCallback(async () => {
+    if (pendingUsage.current) return;
+    pendingUsage.current = true;
+    try {
+      const response = await fetch('/api/usage', { cache: 'no-store', signal: AbortSignal.timeout(15000) });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || 'Usage unavailable');
+      setUsage(data); setUsageError('');
+    } catch (error) { setUsageError(error.message); }
+    finally { pendingUsage.current = false; setLoading(false); }
+  }, []);
+  useLiveRefresh(refreshUsage, status === 'authenticated');
 
   const fetchKeys = useCallback(() => {
     setKeysLoading(true);
@@ -129,6 +135,7 @@ function DashboardContent() {
   }
 
   if (!session) return null;
+  if (!usage) return <div className="py-20"><p role="alert">Usage unavailable: {usageError || 'Please retry.'}</p><button onClick={refreshUsage} className="mt-3 underline">Retry</button></div>;
 
   const wordsUsed = usage?.wordsUsed || 0;
   const compressionCount = usage?.compressionCount || 0;
@@ -163,9 +170,9 @@ function DashboardContent() {
       {!isAdvanced && (
         <div className="bg-savings/5 border border-savings/30 rounded-xl p-5 mb-8 flex items-center justify-between gap-4">
           <div>
-            <p className="text-sm font-semibold text-text">Unlock the Enigma Machine</p>
+            <p className="text-sm font-semibold text-text">Keep full hosted compression beyond 500 calls</p>
             <p className="text-xs text-text-secondary mt-0.5">
-              Rosetta Protocol · Domain rotors · Cross-session learning · $5/month
+              Full hosted compression after your free monthly allowance · $5/month
             </p>
           </div>
           <button
@@ -179,17 +186,19 @@ function DashboardContent() {
       )}
 
       {/* Stats */}
+      <p className="text-sm text-text-muted mb-4">Month: {usage.currentPeriod} (UTC). Updated {new Date(usage.generatedAt).toLocaleString()}. Refreshes every 60 seconds while visible. <button onClick={refreshUsage} className="underline">Refresh now</button></p>
+      {usageError && <p role="alert" className="text-red-400 mb-4">Refresh failed: {usageError}. Showing the last successful snapshot.</p>}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
         {[
-          { label: 'Words compressed', value: wordsUsed.toLocaleString() },
-          { label: 'Compressions', value: compressionCount.toLocaleString() },
+          { label: 'Recorded requests', value: compressionCount.toLocaleString() },
+          { label: 'Successful compressions', value: usage.successfulCompressionCount.toLocaleString() },
           {
-            label: 'Tokens saved',
+            label: 'Estimated tokens saved',
             value: (usage?.tokensSaved || 0).toLocaleString(),
             highlight: true,
           },
           {
-            label: 'Dollars saved',
+            label: 'Illustrative token value',
             value: `$${(usage?.dollarsSaved || 0).toFixed(2)}`,
             highlight: true,
           },
@@ -204,6 +213,7 @@ function DashboardContent() {
       </div>
 
       {/* Empty state for new users */}
+      <p className="text-xs text-text-muted mb-6">{wordsUsed.toLocaleString()} words processed. Successful means positive estimated token savings. Illustrative value uses ${usage.costAssumptionUsdPerMillion} per million input tokens; it is not a measured provider bill reduction. Offline and anonymous SDK use are not included.</p>
       {compressionCount === 0 ? (
         <div className="bg-bg-card border border-border rounded-xl p-8 text-center mb-8">
           <div className="text-4xl mb-3">&#x1F680;</div>

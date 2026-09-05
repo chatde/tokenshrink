@@ -1,5 +1,6 @@
 'use client';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
+import { useLiveRefresh } from '@/app/lib/use-live-refresh';
 function FeedbackItem({ item, refresh }) {
   const [status,setStatus]=useState(item.status);
   const [resolution,setResolution]=useState(item.resolution||'');
@@ -21,16 +22,19 @@ function FeedbackItem({ item, refresh }) {
 }
 export default function OperationsBoard(){
  const [data,setData]=useState(null);const [error,setError]=useState('');const [busy,setBusy]=useState(false);
- const refresh=useCallback(async()=>{setBusy(true);setError('');try{const r=await fetch('/api/admin/board',{cache:'no-store'});const d=await r.json();if(!r.ok)throw new Error(d.error);setData(d)}catch(e){setError(e.message)}finally{setBusy(false)}},[]);
- useEffect(()=>{refresh()},[refresh]);
+ const pending=useRef(false);
+ const refresh=useCallback(async()=>{if(pending.current)return;pending.current=true;setBusy(true);setError('');try{const r=await fetch('/api/admin/board',{cache:'no-store',signal:AbortSignal.timeout(15000)});const d=await r.json();if(!r.ok)throw new Error(d.error);setData(d)}catch(e){setError(e.message)}finally{pending.current=false;setBusy(false)}},[]);
+ useLiveRefresh(refresh);
  return <div className="mt-6 space-y-8">
   <div className="flex gap-4 items-center"><button disabled={busy} onClick={refresh} className="border border-border rounded px-4 py-2">{busy?'Loading…':'Refresh'}</button>{data&&<p className="text-xs text-text-muted">Updated {new Date(data.generatedAt).toLocaleString()}</p>}</div>
-  {error&&<p role="alert" className="text-red-400">{error}</p>}
+  <p className="text-xs text-text-muted">Recalculated from stored records every 60 seconds while this tab is visible. Daily rows use UTC. Research benchmarks on the Progress page are dated test snapshots.</p>
+  {error&&<p role="alert" className="text-red-400">Refresh failed: {error}. {data?'Showing the last successful snapshot above.':'No data loaded; unavailable numbers are not zero.'}</p>}
   {data&&<>
    <section className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">{[['Successful compressions · all recorded',data.usage.lifetime_successful_compressions],['Successful compressions · 30 days',data.usage.successful_compressions],['Estimated tokens saved · all recorded',data.usage.lifetime_estimated_tokens_saved],['Estimated tokens saved · 30 days',data.usage.estimated_tokens_saved],['Accounts',data.accounts.total],['New accounts · 30 days',data.accounts.new_accounts],['Logged requests · 30 days',data.usage.requests],['Active accounts · 30 days',data.usage.active_accounts]].map(([label,value])=><div key={label} className="p-5 border border-border rounded-xl bg-bg-card"><p className="text-sm text-text-muted">{label}</p><p className="text-3xl mt-2">{Number(value).toLocaleString()}</p></div>)}</section>
    <p className="text-sm text-text-muted">A successful compression is a recorded request with positive estimated token savings. These counts cover signed-in/API-key use stored in the database, including historical records. They do not measure answer accuracy or verified provider bill reductions.</p>
    <p className="text-sm text-text-muted">All recorded: {Number(data.usage.lifetime_requests).toLocaleString()} requests, including {Number(data.usage.lifetime_no_savings_requests).toLocaleString()} with no positive savings. Last 30 days: {Number(data.usage.no_savings_requests).toLocaleString()} requests with no positive savings. Anonymous and offline SDK use are not included in these counts; self-reported telemetry appears separately.</p>
    <section><h2 className="text-xl mb-3">Daily signed-in usage · 30 days</h2><div className="overflow-x-auto"><table className="w-full text-left"><thead><tr><th className="p-2">Date</th><th>Requests</th><th>Successful compressions</th><th>Active accounts</th></tr></thead><tbody>{data.daily.map(d=><tr key={d.day} className="border-t border-border"><td className="p-2">{d.day}</td><td>{d.requests}</td><td>{d.successful_compressions}</td><td>{d.active_accounts}</td></tr>)}</tbody></table></div>{!data.daily.length&&<p>No recorded requests in this period.</p>}</section>
+   <section><h2 className="text-xl mb-3">Anonymous hosted activity · recorded since this tracking update</h2><p>{Number(data.anonymous.requests).toLocaleString()} requests · {Number(data.anonymous.successful_compressions).toLocaleString()} successful compressions · {Number(data.anonymous.estimated_tokens_saved).toLocaleString()} estimated tokens saved</p><p className="text-sm text-text-muted mt-2">Server-calculated counts, not unique people. Prior anonymous activity was not recorded here and cannot be recovered. Only numeric compression statistics are saved; no prompt text or visitor identifier is added. {data.anonymous.first_recorded_at ? `First stored event: ${new Date(data.anonymous.first_recorded_at).toLocaleString()}.` : "No events stored yet."}</p></section>
    <section><h2 className="text-xl mb-3">Self-reported telemetry · 30 days</h2><p className="text-sm text-text-muted mb-3">Collection begins with the tracking repair. Historical missing events cannot be recovered.</p>{data.telemetry.map(t=><p key={t.source}>{t.source}: {t.events} events · {Number(t.reported_tokens_saved).toLocaleString()} reported tokens saved</p>)}{!data.telemetry.length&&<p>No events recorded yet.</p>}</section>
    <section><h2 className="text-xl mb-4">Feedback inbox · latest 100</h2><div className="space-y-4">{data.feedback.map(f=><FeedbackItem key={f.id+f.updated_at} item={f} refresh={refresh}/>)}{!data.feedback.length&&<p>No feedback yet. Share the feedback page with users.</p>}</div></section>
   </>}

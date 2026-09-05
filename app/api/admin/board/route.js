@@ -5,7 +5,7 @@ import { sql } from 'drizzle-orm';
 export async function GET() {
   if (!await requireAdmin()) return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
   try {
-    const [accounts, usage, telemetry, daily, feedback] = await Promise.all([
+    const [accounts, usage, telemetry, daily, feedback, anonymous] = await Promise.all([
       db.execute(sql`SELECT count(*)::int AS total, count(*) FILTER (WHERE created_at >= now()-interval '30 days')::int AS new_accounts FROM users`),
       db.execute(sql`SELECT
         count(*)::bigint AS lifetime_requests,
@@ -21,8 +21,11 @@ export async function GET() {
       db.execute(sql`SELECT source, count(*)::int AS events, COALESCE(sum(saved_tokens),0)::bigint AS reported_tokens_saved FROM analytics_events WHERE created_at >= now()-interval '30 days' GROUP BY source ORDER BY events DESC`),
       db.execute(sql`SELECT to_char(created_at, 'YYYY-MM-DD') AS day, count(*)::int AS requests, count(*) FILTER (WHERE tokens_saved > 0)::int AS successful_compressions, count(distinct user_id)::int AS active_accounts FROM compressions WHERE user_id IS NOT NULL AND created_at >= now()-interval '30 days' GROUP BY 1 ORDER BY 1 DESC`),
       db.execute(sql`SELECT id, category, message, status, summary, resolution, created_at, updated_at FROM feedback ORDER BY created_at DESC LIMIT 100`),
+      db.execute(sql`SELECT count(*)::bigint requests, count(*) FILTER (WHERE tokens_saved>0)::bigint successful_compressions,
+        COALESCE(sum(tokens_saved),0)::bigint estimated_tokens_saved, min(created_at) first_recorded_at
+        FROM compressions WHERE user_id IS NULL`),
     ]);
-    return NextResponse.json({ generatedAt: new Date().toISOString(), accounts: accounts.rows[0], usage: usage.rows[0], telemetry: telemetry.rows, daily: daily.rows, feedback: feedback.rows }, { headers: { 'Cache-Control': 'private, no-store' } });
+    return NextResponse.json({ generatedAt: new Date().toISOString(), accounts: accounts.rows[0], usage: usage.rows[0], anonymous: anonymous.rows[0], telemetry: telemetry.rows, daily: daily.rows, feedback: feedback.rows }, { headers: { 'Cache-Control': 'private, no-store' } });
   } catch {
     return NextResponse.json({ error: 'Usage board unavailable' }, { status: 503, headers: { 'Cache-Control': 'no-store' } });
   }

@@ -1,15 +1,15 @@
 import { NextResponse } from 'next/server';
 import { auth } from '@/app/lib/auth';
 import { db } from '@/app/lib/db';
-import { compressions, usageMeters, users, apiKeys } from '@/schema/schema';
-import { eq, and, isNull, sql } from 'drizzle-orm';
+import { users, apiKeys } from '@/schema/schema';
+import { eq, and, isNull } from 'drizzle-orm';
+import { compressionRecordQuery } from '@/app/lib/record-compression';
 import { readJsonLimited, RequestError } from '@/app/lib/request-safety';
 import { compress } from '@/app/lib/compression/engine';
 import { validateCompressionInput } from '@/app/lib/validate';
 import { checkRateLimit, rateLimitResponse } from '@/app/lib/rate-limit';
 import {
   getPlan,
-  getCurrentPeriod,
 } from '@/app/lib/billing';
 import { getCompressionTier } from '@/app/lib/gates';
 import { createHash } from 'crypto';
@@ -80,47 +80,11 @@ export async function POST(request) {
     const result = compress(text, {
       domain,
       tier: isProUser ? 'pro' : (isFreeExceeded ? 'basic' : 'free'),
+      analytics: false,
     });
 
-    // Log compression and update usage (for authenticated users)
-    if (userId) {
-      const period = getCurrentPeriod();
-
-      await db.insert(compressions).values({
-        userId,
-        originalWords: result.stats.originalWords,
-        compressedWords: result.stats.totalCompressedWords,
-        rosettaWords: result.stats.rosettaWords,
-        ratio: result.stats.ratio,
-        strategy: result.stats.strategy,
-        tokensSaved: result.stats.tokensSaved,
-        originalTokens: result.stats.originalTokens,
-        compressedTokens: result.stats.totalCompressedTokens,
-      });
-
-      // Atomic increments avoid lost usage when a user sends concurrent calls.
-      await db.insert(usageMeters).values({
-          userId,
-          period,
-          wordsProcessed: validation.words,
-          compressionCount: 1,
-          tokensSaved: result.stats.tokensSaved,
-          dollarsSaved: result.stats.dollarsSaved,
-        }).onConflictDoUpdate({ target: [usageMeters.userId, usageMeters.period], set: {
-          wordsProcessed: sql`${usageMeters.wordsProcessed} + ${validation.words}`,
-          compressionCount: sql`${usageMeters.compressionCount} + 1`,
-          tokensSaved: sql`${usageMeters.tokensSaved} + ${result.stats.tokensSaved}`,
-          dollarsSaved: sql`${usageMeters.dollarsSaved} + ${result.stats.dollarsSaved}`,
-        } });
-
-      // Update lastUsedAt on API key
-      if (apiKeyId) {
-        await db
-          .update(apiKeys)
-          .set({ lastUsedAt: new Date() })
-          .where(eq(apiKeys.id, apiKeyId));
-      }
-    }
+    // A response is returned only after the event and monthly meter commit together.
+    await db.execute(compressionRecordQuery({ userId, apiKeyId, stats: result.stats, words: validation.words }));
 
     const responseExtra = isFreeExceeded ? {
       plan: 'free',

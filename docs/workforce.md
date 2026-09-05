@@ -18,9 +18,10 @@ The lead owns task selection, integration, tests and release decisions. Other mo
 node scripts/workforce-review.mjs minimax --probe
 node scripts/workforce-review.mjs xiaomi --review sdk/src/codebook.js
 node scripts/workforce-review.mjs gemini --review docs/workforce.md
+node scripts/workforce-review.mjs xiaomi --research docs/session-codec.md
 ```
 
-Each invocation makes one request, with at most 400 completion tokens for probes or 800 for reviews, a 45-second timeout and no retries or provider fallback. Inputs are limited to 12,000 bytes and explicit files under `sdk/src`, `tests`, or `docs`. Symlinks, traversal, environment files and common credential patterns are blocked. Pattern checks cannot recognize every secret: the lead must inspect the selected file before sending it. No customer prompts, feedback, auth records or environment contents belong in reviews.
+Each invocation makes one request, with at most 400 completion tokens for probes, 800 for reviews, or 1,200 for research, a 45-second timeout and no retries or provider fallback. Inputs are limited to 12,000 bytes and explicit files under `sdk/src`, `tests`, or `docs`. Symlinks, traversal, environment files and common credential patterns are blocked. Pattern checks cannot recognize every secret: the lead must inspect the selected file before sending it. No customer prompts, feedback, auth records or environment contents belong in reviews.
 
 Credentials are read at runtime from process environment, then the private `~/.config/tokenshrink/workforce.env` file. Existing MiMo Hermes dotenv and matching MiniMax Hermes credential-pool entries remain supported. No credential is printed, copied into this repository or sent to any endpoint except the hardcoded provider. Browser OAuth credentials are not converted into API keys. Provider error bodies are suppressed to avoid echoing credentials.
 
